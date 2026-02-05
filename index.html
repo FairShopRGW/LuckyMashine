@@ -1,1530 +1,493 @@
-<!doctype html>
-<html lang="en" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Slots Casino</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Rajdhani:wght@400;500;700&amp;display=swap" rel="stylesheet">
-  <style>
-    body {
-      box-sizing: border-box;
-    }
-    
-    * {
-      font-family: 'Rajdhani', sans-serif;
-    }
-    
-    .font-display {
-      font-family: 'Orbitron', monospace;
-    }
-    
-    @keyframes neonPulse {
-      0%, 100% { 
-        text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
-        filter: brightness(1);
-      }
-      50% { 
-        text-shadow: 0 0 2px currentColor, 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px currentColor;
-        filter: brightness(0.8);
-      }
-    }
-    
-    @keyframes slotSpin {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-100%); }
-    }
-    
-    @keyframes jackpotGlow {
-      0%, 100% { 
-        box-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 60px #ff00ff, inset 0 0 20px rgba(255,0,255,0.3);
-      }
-      50% { 
-        box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff, inset 0 0 30px rgba(0,255,255,0.3);
-      }
-    }
-    
-    @keyframes coinDrop {
-      0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100px) rotate(720deg); opacity: 0; }
-    }
-    
-    @keyframes winFlash {
-      0%, 100% { background: linear-gradient(45deg, #ff00ff, #00ffff); }
-      25% { background: linear-gradient(45deg, #ffff00, #ff00ff); }
-      50% { background: linear-gradient(45deg, #00ff00, #ffff00); }
-      75% { background: linear-gradient(45deg, #00ffff, #00ff00); }
-    }
-    
-    @keyframes borderGlow {
-      0%, 100% { border-color: #ff00ff; box-shadow: 0 0 15px #ff00ff, inset 0 0 15px rgba(255,0,255,0.2); }
-      33% { border-color: #00ffff; box-shadow: 0 0 15px #00ffff, inset 0 0 15px rgba(0,255,255,0.2); }
-      66% { border-color: #ffff00; box-shadow: 0 0 15px #ffff00, inset 0 0 15px rgba(255,255,0,0.2); }
-    }
-    
-    @keyframes leverPull {
-      0% { transform: rotate(0deg); }
-      50% { transform: rotate(-50deg); }
-      100% { transform: rotate(0deg); }
-    }
-    
-    @keyframes buttonPress {
-      0% { transform: scale(1); }
-      50% { transform: scale(0.95); }
-      100% { transform: scale(1); }
-    }
-    
-    .lever-active {
-      animation: leverPull 0.6s ease-in-out !important;
-    }
-    
-    .button-press {
-      animation: buttonPress 0.3s ease-out !important;
-    }
-    
-    .neon-text {
-      animation: neonPulse 2s ease-in-out infinite;
-    }
-    
-    .jackpot-display {
-      animation: jackpotGlow 3s ease-in-out infinite;
-    }
-    
-    .slot-spinning .slot-symbol {
-      animation: slotSpin 0.1s linear infinite;
-    }
-    
-    .win-animation {
-      animation: winFlash 0.5s ease-in-out 5;
-    }
-    
-    .border-glow {
-      animation: borderGlow 4s ease-in-out infinite;
-    }
-    
-    .coin-particle {
-      animation: coinDrop 1s ease-in forwards;
-      position: absolute;
-      font-size: 24px;
-      pointer-events: none;
-    }
-    
-    .glass-panel {
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .neon-button {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .neon-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    .neon-button:hover::before {
-      left: 100%;
-    }
-    
-    .slot-reel {
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .slot-strip {
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.1s ease-out;
-    }
-    
-    .bg-cyber {
-      background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2a 50%, #0a1a2a 100%);
-    }
-    
-    .bg-neon-city {
-      background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    }
-    
-    .bg-matrix {
-      background: linear-gradient(135deg, #000000 0%, #0a2a0a 50%, #001a00 100%);
-    }
-    
-    .bg-sunset {
-      background: linear-gradient(135deg, #1a0a0a 0%, #2a1a0a 50%, #1a0a1a 100%);
-    }
-    
-    .bg-ocean {
-      background: linear-gradient(135deg, #0a0a2a 0%, #0a1a3a 50%, #0a2a3a 100%);
-    }
-    
-    .skin-classic .slot-machine-frame {
-      border-color: #ff00ff;
-      box-shadow: 0 0 30px #ff00ff, inset 0 0 30px rgba(255,0,255,0.2);
-    }
-    
-    .skin-gold .slot-machine-frame {
-      border-color: #ffd700;
-      box-shadow: 0 0 30px #ffd700, inset 0 0 30px rgba(255,215,0,0.2);
-    }
-    
-    .skin-emerald .slot-machine-frame {
-      border-color: #00ff88;
-      box-shadow: 0 0 30px #00ff88, inset 0 0 30px rgba(0,255,136,0.2);
-    }
-    
-    .skin-ruby .slot-machine-frame {
-      border-color: #ff0055;
-      box-shadow: 0 0 30px #ff0055, inset 0 0 30px rgba(255,0,85,0.2);
-    }
-    
-    .skin-diamond .slot-machine-frame {
-      border-color: #00ffff;
-      box-shadow: 0 0 30px #00ffff, inset 0 0 30px rgba(0,255,255,0.2);
-    }
-    
-    .tab-active {
-      background: linear-gradient(180deg, rgba(255,0,255,0.3) 0%, rgba(0,255,255,0.1) 100%);
-      border-bottom: 3px solid #ff00ff;
-    }
-    
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.3);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #ff00ff, #00ffff);
-      border-radius: 4px;
-    }
-    
-    .modal-overlay {
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
-    }
-    
-    .stats-bar {
-      background: linear-gradient(90deg, rgba(255,0,255,0.2) 0%, rgba(0,255,255,0.2) 100%);
-    }
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Slots - Risiko Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-    .lever-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
+        :root {
+            --neon-color: #ff00ff;
+            --bg-color: #050505;
+            --panel-bg: #1a1a1a;
+            --risk-color: #ff3333;
+            --take-color: #33ff33;
+        }
 
-    .lever-base {
-      width: 60px;
-      height: 80px;
-      background: linear-gradient(135deg, #2a2a3a 0%, #1a1a2a 100%);
-      border-radius: 15px;
-      border: 3px solid #444;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 2px 5px rgba(255,255,255,0.1);
-      position: relative;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 8px;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+        }
 
-    .lever-handle {
-      width: 50px;
-      height: 200px;
-      background: linear-gradient(90deg, #b8860b 0%, #ffd700 40%, #ffa500 100%);
-      border-radius: 25px;
-      border: 3px solid #8b6914;
-      cursor: pointer;
-      transform-origin: bottom center;
-      transition: transform 0.1s;
-      box-shadow: 0 15px 40px rgba(255,215,0,0.4), inset -3px -3px 8px rgba(0,0,0,0.3), inset 3px 3px 8px rgba(255,255,255,0.2);
-      position: relative;
-      overflow: hidden;
-    }
+        /* --- Container --- */
+        .casino-container {
+            background: var(--panel-bg);
+            padding: 40px;
+            border: 2px solid var(--neon-color);
+            border-radius: 20px;
+            box-shadow: 0 0 20px var(--neon-color), inset 0 0 20px var(--neon-color);
+            text-align: center;
+            position: relative;
+            width: 420px;
+            transition: border-color 0.5s, box-shadow 0.5s;
+        }
 
-    .lever-handle::before {
-      content: '';
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 35px;
-      height: 35px;
-      background: radial-gradient(circle at 30% 30%, #ffff00, #ff8800);
-      border-radius: 50%;
-      box-shadow: 0 0 20px #ff8800, inset 0 0 10px rgba(255,255,255,0.6);
-    }
+        h1 {
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-color);
+            margin: 0 0 20px 0;
+            font-size: 2rem;
+        }
 
-    .lever-handle::after {
-      content: '';
-      position: absolute;
-      bottom: 15%;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px white;
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
 
-    .lever-handle:hover {
-      filter: brightness(1.15);
-    }
+        /* --- Slots --- */
+        .slot-machine {
+            display: flex;
+            justify-content: space-between;
+            background: black;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
 
-    .lever-label {
-      text-align: center;
-      font-display: 'Orbitron';
-      font-size: 11px;
-      color: #888;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: bold;
-    }
+        .reel {
+            width: 30%;
+            background: #222;
+            border: 1px solid var(--neon-color);
+            border-radius: 5px;
+            font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 10px #000;
+        }
 
-    .control-mode-selector {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+        /* Animation */
+        .spinning span {
+            animation: blurText 0.1s infinite;
+        }
+        @keyframes blurText {
+            0% { transform: translateY(-10px); filter: blur(2px); }
+            50% { transform: translateY(10px); filter: blur(4px); }
+            100% { transform: translateY(-10px); filter: blur(2px); }
+        }
 
-    .control-mode-btn {
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid transparent;
-    }
+        /* --- Buttons --- */
+        button {
+            background: transparent;
+            color: var(--neon-color);
+            border: 2px solid var(--neon-color);
+            padding: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--neon-color);
+            transition: 0.2s;
+            border-radius: 5px;
+            margin: 5px;
+            min-width: 100px;
+        }
 
-    .control-mode-btn.active {
-      background: linear-gradient(135deg, #ff00ff, #00ffff);
-      box-shadow: 0 0 20px rgba(255,0,255,0.5);
-      border-color: #ff00ff;
-    }
+        button:hover:not(:disabled) {
+            background: var(--neon-color);
+            color: black;
+            box-shadow: 0 0 30px var(--neon-color);
+        }
 
-    .control-mode-btn.inactive {
-      background: rgba(255,255,255,0.1);
-      color: #999;
-    }
-   Center reels, symbols and win display */
-#slot-container {
-  display: flex;
-  justify-content: center;
-  align-items: center; /* vertikal zentrieren */
-  gap: 0.5rem; /* bereits vorhanden, ggf. anpassen */
-}
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            box-shadow: none;
+            border-color: #555;
+            color: #555;
+        }
 
-.slot-reel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
+        /* --- Risiko Bereich --- */
+        .risk-area {
+            margin-top: 15px;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+            display: none; /* Standardmäßig ausgeblendet */
+            animation: pulseRisk 0.5s infinite alternate;
+        }
 
-.slot-strip {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* wichtig damit jedes Symbol in der Mitte steht */
-  justify-content: center;
-  width: 100%;
-  transition: transform 0.1s ease-out;
-}
+        .risk-card {
+            font-size: 4rem;
+            margin: 10px 0;
+            text-shadow: 0 0 20px white;
+        }
 
-.slot-symbol {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
-}
+        .risk-btn {
+            border-color: var(--risk-color);
+            color: var(--risk-color);
+            box-shadow: 0 0 10px var(--risk-color);
+        }
+        .risk-btn:hover:not(:disabled) {
+            background: var(--risk-color);
+            color: white;
+            box-shadow: 0 0 20px var(--risk-color);
+        }
 
-/* Win-Text / Win-Display immer zentrieren */
-#win-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 2rem; /* Höhe beibehalten oder anpassen */
-}
+        .take-btn {
+            border-color: var(--take-color);
+            color: var(--take-color);
+            box-shadow: 0 0 10px var(--take-color);
+        }
+        .take-btn:hover:not(:disabled) {
+            background: var(--take-color);
+            color: black;
+            box-shadow: 0 0 20px var(--take-color);
+        }
 
-/* Optional: damit animierte/wechselnde Inhalte nicht die Breite verschieben */
-.slot-reel,
-.slot-symbol {
-  min-width: 4.5rem; /* sorgt für konstante Breite; an deine Größe anpassen */
-  max-width: 6rem;
-}
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
- </head>
- <body class="h-full overflow-auto bg-cyber">
-  <div id="app" class="min-h-full flex flex-col skin-classic"><!-- Top Bar -->
-   <header class="glass-panel p-3 flex items-center justify-between flex-wrap gap-2">
-    <div class="flex items-center gap-3">
-     <h1 id="casino-title" class="font-display text-xl md:text-2xl font-black text-pink-400 neon-text">🎰 NEON SLOTS</h1>
+        @keyframes pulseRisk {
+            from { box-shadow: 0 0 5px var(--risk-color); }
+            to { box-shadow: 0 0 20px var(--risk-color); }
+        }
+
+        /* --- Overlays --- */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .hidden { display: none !important; }
+
+        input {
+            background: transparent;
+            border: 1px solid var(--neon-color);
+            color: white;
+            padding: 10px;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 5px var(--neon-color);
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            border: none;
+            box-shadow: none;
+            min-width: auto;
+        }
+        .settings-btn:hover { background: transparent; color: white; }
+
+        .color-picker { display: flex; gap: 10px; margin-top: 20px; }
+        .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+        
+        #message-area { 
+            height: 30px; margin-top: 10px; 
+            font-weight: bold; text-shadow: 0 0 5px white; 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay" class="overlay">
+        <h1 style="color: var(--neon-color)">NEON SLOTS</h1>
+        <p>Login zum Speichern</p>
+        <input type="text" id="username" placeholder="Dein Name">
+        <button onclick="login()">Start Game</button>
     </div>
-    <div class="flex items-center gap-2 flex-wrap"><!-- Balance Display -->
-     <div class="glass-panel rounded-lg px-4 py-2 flex items-center gap-2"><span class="text-yellow-400 text-xl">💰</span> <span class="font-display text-lg text-green-400" id="balance-display">0</span> <span class="text-gray-400 text-sm">Credits</span>
-     </div><!-- Music Toggle --> <button id="music-toggle" onclick="toggleMusic()" class="neon-button glass-panel rounded-lg px-3 py-2 text-cyan-400 hover:text-pink-400 transition-colors"> 🔊 </button> <!-- Menu Buttons --> <button onclick="showModal('shop')" class="neon-button glass-panel rounded-lg px-4 py-2 text-pink-400 hover:text-cyan-400 font-bold"> 🛒 Shop </button> <button onclick="showModal('exchange')" class="neon-button glass-panel rounded-lg px-4 py-2 text-yellow-400 hover:text-green-400 font-bold"> 💱 Wechsler </button> <button onclick="showModal('paytable')" class="neon-button glass-panel rounded-lg px-4 py-2 text-cyan-400 hover:text-pink-400 font-bold"> 📊 Tabelle </button> <button onclick="showModal('stats')" class="neon-button glass-panel rounded-lg px-4 py-2 text-green-400 hover:text-yellow-400 font-bold"> 📈 Stats </button>
-    </div>
-   </header><!-- Jackpot Display -->
-   <div class="p-4">
-    <div class="jackpot-display glass-panel rounded-2xl p-4 text-center max-w-2xl mx-auto">
-     <div class="text-gray-400 text-sm mb-1">
-      🏆 MEGA JACKPOT 🏆
-     </div>
-     <div class="font-display text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-yellow-400 to-cyan-400" id="jackpot-display">
-      10,000
-     </div>
-     <div class="flex items-center justify-center gap-2 mt-2"><span class="text-gray-400 text-sm">Nächster Jackpot in:</span> <span class="font-display text-lg text-pink-400" id="jackpot-timer">10:00</span>
-     </div>
-    </div>
-   </div><!-- Main Slot Machine -->
-   <main class="flex-1 flex items-center justify-center p-4">
-    <div class="flex items-end gap-6 md:gap-8 max-w-4xl w-full"><!-- Slot Machine -->
-     <div class="slot-machine-frame glass-panel rounded-3xl p-6 md:p-8 border-4 border-glow flex-1 max-w-lg"><!-- Welcome Text -->
-      <p id="welcome-text" class="text-center text-cyan-400 mb-4 text-lg">Drehe und gewinne groß!</p><!-- Control Mode Selector -->
-      <div class="control-mode-selector"><button onclick="setControlMode('button')" class="control-mode-btn active" id="btn-mode-button"> 🔘 Knopf </button> <button onclick="setControlMode('lever')" class="control-mode-btn inactive" id="btn-mode-lever"> 🎚️ Hebel </button>
-      </div><!-- Slot Display -->
-      <div class="bg-black rounded-2xl p-4 mb-6 border-2 border-gray-700">
-       <div class="flex justify-center gap-2 md:gap-4" id="slot-container"><!-- Reel 1 -->
-        <div class="slot-reel w-20 h-24 md:w-24 md:h-28 bg-gradient-to-b from-gray-900 to-black rounded-xl border-2 border-gray-600 flex items-center justify-center overflow-hidden">
-         <div class="slot-strip" id="reel-1">
-          <div class="slot-symbol text-5xl md:text-6xl flex items-center justify-center h-24 md:h-28">
-           🍒
-          </div>
-         </div>
-        </div><!-- Reel 2 -->
-        <div class="slot-reel w-20 h-24 md:w-24 md:h-28 bg-gradient-to-b from-gray-900 to-black rounded-xl border-2 border-gray-600 flex items-center justify-center overflow-hidden">
-         <div class="slot-strip" id="reel-2">
-          <div class="slot-symbol text-5xl md:text-6xl flex items-center justify-center h-24 md:h-28">
-           🍋
-          </div>
-         </div>
-        </div><!-- Reel 3 -->
-        <div class="slot-reel w-20 h-24 md:w-24 md:h-28 bg-gradient-to-b from-gray-900 to-black rounded-xl border-2 border-gray-600 flex items-center justify-center overflow-hidden">
-         <div class="slot-strip" id="reel-3">
-          <div class="slot-symbol text-5xl md:text-6xl flex items-center justify-center h-24 md:h-28">
-           🍊
-          </div>
-         </div>
+
+    <div id="settings-overlay" class="overlay hidden">
+        <h2>Farbe wählen</h2>
+        <div class="color-picker">
+            <div class="color-option" style="background: #ff00ff;" onclick="changeColor('#ff00ff')"></div>
+            <div class="color-option" style="background: #00ffff;" onclick="changeColor('#00ffff')"></div>
+            <div class="color-option" style="background: #00ff00;" onclick="changeColor('#00ff00')"></div>
+            <div class="color-option" style="background: #ffcc00;" onclick="changeColor('#ffcc00')"></div>
+            <div class="color-option" style="background: #ff0000;" onclick="changeColor('#ff0000')"></div>
         </div>
-       </div><!-- Win Line -->
-       <div class="h-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent mt-2 opacity-50"></div>
-      </div><!-- Win Display -->
-      <div id="win-display" class="text-center mb-4 h-8"><span class="font-display text-2xl text-yellow-400 hidden" id="win-text">+0</span>
-      </div><!-- Bet Controls -->
-      <div class="flex items-center justify-center gap-4 mb-6"><button onclick="adjustBet(-10)" class="neon-button glass-panel w-12 h-12 rounded-full text-2xl text-pink-400 hover:text-cyan-400 font-bold">-</button>
-       <div class="glass-panel rounded-xl px-6 py-3 text-center min-w-32">
-        <div class="text-gray-400 text-xs">
-         EINSATZ
+        <br><button onclick="toggleSettings()">Zurück</button>
+    </div>
+
+    <div class="casino-container">
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+        <h1>Neon Slots</h1>
+        
+        <div class="stats">
+            <div>Spieler: <span id="player-name" style="color:var(--neon-color)">Gast</span></div>
+            <div>Bank: <span id="money">100</span>€</div>
         </div>
-        <div class="font-display text-2xl text-cyan-400" id="bet-display">
-         10
+
+        <div class="slot-machine">
+            <div class="reel" id="reel1"><span>🍒</span></div>
+            <div class="reel" id="reel2"><span>🍋</span></div>
+            <div class="reel" id="reel3"><span>💎</span></div>
         </div>
-       </div><button onclick="adjustBet(10)" class="neon-button glass-panel w-12 h-12 rounded-full text-2xl text-pink-400 hover:text-cyan-400 font-bold">+</button>
-      </div><!-- Spin Controls Container -->
-      <div id="controls-container"></div><!-- Auto Spin -->
-      <div class="flex items-center justify-center gap-4 mt-4"><button onclick="toggleAutoSpin()" id="auto-spin-btn" class="neon-button glass-panel px-4 py-2 rounded-lg text-gray-400 hover:text-pink-400 text-sm"> 🔄 Auto-Spin: AUS </button> <button onclick="maxBet()" class="neon-button glass-panel px-4 py-2 rounded-lg text-yellow-400 hover:text-green-400 text-sm font-bold"> MAX BET </button>
-      </div>
-     </div><!-- Lever Control (Right Side) -->
-     <div id="lever-wrapper" class="hidden flex-col items-center justify-end pb-4">
-      <div class="lever-container">
-       <div class="lever-label">
-        Hebel
-       </div>
-       <div class="lever-base">
-        <div id="lever-handle" class="lever-handle cursor-pointer" onclick="pullLever()" style="transform: rotate(0deg)"></div>
-       </div>
-       <div class="text-center mt-2">
-        <div class="text-xs text-gray-500 font-display">
-         ZIEHEN!
+
+        <div id="message-area">Einsatz: 10€</div>
+
+        <div class="controls" id="main-controls">
+            <button id="spin-btn" onclick="spin()">SPIN</button>
         </div>
-       </div>
-      </div>
-     </div>
-    </div>
-   </main><!-- Bottom Stats Bar -->
-   <div class="stats-bar glass-panel p-3 flex items-center justify-around flex-wrap gap-2 text-sm">
-    <div class="text-center">
-     <div class="text-gray-400">
-      Spins
-     </div>
-     <div class="font-display text-cyan-400" id="total-spins">
-      0
-     </div>
-    </div>
-    <div class="text-center">
-     <div class="text-gray-400">
-      Gewinne
-     </div>
-     <div class="font-display text-green-400" id="total-wins">
-      0
-     </div>
-    </div>
-    <div class="text-center">
-     <div class="text-gray-400">
-      Jackpots
-     </div>
-     <div class="font-display text-yellow-400" id="jackpots-won">
-      0
-     </div>
-    </div>
-    <div class="text-center">
-     <div class="text-gray-400">
-      Skin
-     </div>
-     <div class="font-display text-pink-400" id="current-skin-name">
-      Classic
-     </div>
-    </div>
-   </div>
-  </div><!-- Modal Container -->
-  <div id="modal-container" class="fixed inset-0 modal-overlay hidden z-50 overflow-auto">
-   <div class="min-h-full flex items-center justify-center p-4">
-    <div id="modal-content" class="glass-panel rounded-3xl p-6 max-w-2xl w-full max-h-[90%] overflow-auto border-2 border-pink-500"><!-- Modal content loaded dynamically -->
-    </div>
-   </div>
-  </div><!-- Coin Particles Container -->
-  <div id="coin-particles" class="fixed inset-0 pointer-events-none z-40"></div>
-  <script>
-    // Game State
-    let gameState = {
-      balance: 1000,
-      bet: 10,
-      totalWins: 0,
-      totalSpins: 0,
-      jackpotsWon: 0,
-      currentSkin: 'classic',
-      currentBg: 'cyber',
-      ownedSkins: ['classic'],
-      ownedBgs: ['cyber'],
-      musicEnabled: true,
-      controlMode: 'button',
-      isSpinning: false,
-      autoSpin: false,
-      jackpot: 10000,
-      jackpotTimer: 600,
-      playerId: null
-    };
-    
-    // Symbols and their weights
-    const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '⭐', '💎', '7️⃣', '🎰'];
-    const symbolWeights = [20, 18, 16, 14, 12, 10, 6, 3, 1];
-    
-    // Paytable
-    const paytable = {
-      '🍒🍒🍒': { multiplier: 5, name: 'Kirschen' },
-      '🍋🍋🍋': { multiplier: 8, name: 'Zitronen' },
-      '🍊🍊🍊': { multiplier: 10, name: 'Orangen' },
-      '🍇🍇🍇': { multiplier: 15, name: 'Trauben' },
-      '🔔🔔🔔': { multiplier: 20, name: 'Glocken' },
-      '⭐⭐⭐': { multiplier: 30, name: 'Sterne' },
-      '💎💎💎': { multiplier: 50, name: 'Diamanten' },
-      '7️⃣7️⃣7️⃣': { multiplier: 100, name: 'Lucky 7' },
-      '🎰🎰🎰': { multiplier: 0, name: 'JACKPOT!' }
-    };
-    
-    // Skins
-    const skins = {
-      classic: { name: 'Classic Neon', price: 0, color: '#ff00ff' },
-      gold: { name: 'Golden Luxury', price: 500, color: '#ffd700' },
-      emerald: { name: 'Emerald Dream', price: 750, color: '#00ff88' },
-      ruby: { name: 'Ruby Fire', price: 1000, color: '#ff0055' },
-      diamond: { name: 'Diamond Ice', price: 2000, color: '#00ffff' }
-    };
-    
-    // Backgrounds
-    const backgrounds = {
-      cyber: { name: 'Cyber City', price: 0 },
-      'neon-city': { name: 'Neon Nights', price: 300 },
-      matrix: { name: 'Matrix Code', price: 500 },
-      sunset: { name: 'Neon Sunset', price: 750 },
-      ocean: { name: 'Deep Ocean', price: 1000 }
-    };
-    
-    // Config for Element SDK
-    const defaultConfig = {
-      casino_name: 'NEON SLOTS',
-      welcome_text: 'Drehe und gewinne groß!',
-      primary_color: '#ff00ff',
-      secondary_color: '#00ffff',
-      accent_color: '#ffff00',
-      text_color: '#ffffff',
-      background_color: '#0a0a1a',
-      font_family: 'Orbitron',
-      font_size: 16
-    };
-    
-    let config = { ...defaultConfig };
-    let playerData = null;
-    
-    // Audio Context for Music
-    let audioContext = null;
-    let oscillator = null;
-    let gainNode = null;
-    let musicPlaying = false;
-    
-    // Initialize Audio
-    function initAudio() {
-      if (!audioContext) {
-        try {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-          console.error('Audio context not available:', e);
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    // Play Background Music (Synthwave style)
-    function playMusic() {
-      if (!gameState.musicEnabled || musicPlaying) return;
-      
-      if (!initAudio()) return;
-      
-      const bassFreqs = [65.41, 82.41, 98.00, 73.42];
-      let noteIndex = 0;
-      let musicTimeout = null;
-      
-      function playNote() {
-        if (!gameState.musicEnabled || !musicPlaying) {
-          if (musicTimeout) clearTimeout(musicTimeout);
-          return;
-        }
-        
-        try {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(bassFreqs[noteIndex], audioContext.currentTime);
-          
-          gain.gain.setValueAtTime(0.05, audioContext.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-          
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          
-          osc.start(audioContext.currentTime);
-          osc.stop(audioContext.currentTime + 0.4);
-          
-          noteIndex = (noteIndex + 1) % bassFreqs.length;
-          
-          if (musicPlaying && gameState.musicEnabled) {
-            musicTimeout = setTimeout(playNote, 500);
-          }
-        } catch (e) {
-          console.error('Error playing note:', e);
-        }
-      }
-      
-      musicPlaying = true;
-      playNote();
-    }
-    
-    function stopMusic() {
-      musicPlaying = false;
-    }
-    
-    function toggleMusic() {
-      gameState.musicEnabled = !gameState.musicEnabled;
-      const btn = document.getElementById('music-toggle');
-      
-      if (gameState.musicEnabled) {
-        btn.textContent = '🔊';
-        playMusic();
-      } else {
-        btn.textContent = '🔇';
-        stopMusic();
-      }
-      
-      saveGame();
-    }
-    
-    // Play Win Sound
-    function playWinSound() {
-      initAudio();
-      
-      const frequencies = [523.25, 659.25, 783.99, 1046.50];
-      
-      frequencies.forEach((freq, i) => {
-        setTimeout(() => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-          
-          gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-          
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          
-          osc.start(audioContext.currentTime);
-          osc.stop(audioContext.currentTime + 0.3);
-        }, i * 100);
-      });
-    }
-    
-    // Play Jackpot Sound
-    function playJackpotSound() {
-      initAudio();
-      
-      for (let i = 0; i < 20; i++) {
-        setTimeout(() => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(200 + Math.random() * 800, audioContext.currentTime);
-          
-          gain.gain.setValueAtTime(0.15, audioContext.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-          
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          
-          osc.start(audioContext.currentTime);
-          osc.stop(audioContext.currentTime + 0.1);
-        }, i * 50);
-      }
-    }
-    
-    // Play Spin Sound
-    function playSpinSound() {
-      initAudio();
-      
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(100, audioContext.currentTime);
-      osc.frequency.linearRampToValueAtTime(50, audioContext.currentTime + 0.5);
-      
-      gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      
-      osc.connect(gain);
-      gain.connect(audioContext.destination);
-      
-      osc.start(audioContext.currentTime);
-      osc.stop(audioContext.currentTime + 0.5);
-    }
-    
-    // Get weighted random symbol
-    function getRandomSymbol() {
-      const totalWeight = symbolWeights.reduce((a, b) => a + b, 0);
-      let random = Math.random() * totalWeight;
-      
-      for (let i = 0; i < symbols.length; i++) {
-        random -= symbolWeights[i];
-        if (random <= 0) return symbols[i];
-      }
-      return symbols[0];
-    }
-    
-    // Set control mode
-    function setControlMode(mode) {
-      gameState.controlMode = mode;
-      renderSpinControl();
-      saveGame();
-      
-      const buttonBtn = document.getElementById('btn-mode-button');
-      const leverBtn = document.getElementById('btn-mode-lever');
-      const leverHandle = document.getElementById('lever-handle');
-      
-      if (mode === 'button') {
-        buttonBtn.classList.add('active');
-        buttonBtn.classList.remove('inactive');
-        leverBtn.classList.remove('active');
-        leverBtn.classList.add('inactive');
-        // Hebel zurück in Mitte
-        if (leverHandle) {
-          leverHandle.style.animation = 'none';
-          leverHandle.style.transform = 'rotate(0deg)';
-        }
-      } else {
-        leverBtn.classList.add('active');
-        leverBtn.classList.remove('inactive');
-        buttonBtn.classList.remove('active');
-        buttonBtn.classList.add('inactive');
-      }
-    }
-    
-    // Render spin control based on mode
-    function renderSpinControl() {
-      const container = document.getElementById('controls-container');
-      const leverWrapper = document.getElementById('lever-wrapper');
-      
-      if (gameState.controlMode === 'button') {
-        container.innerHTML = `
-          <button id="spin-button" onclick="spin()" class="neon-button w-full py-4 rounded-2xl font-display text-2xl font-black bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:from-pink-500 hover:to-purple-500 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-            🎰 DREHEN 🎰
-          </button>
-        `;
-        leverWrapper.classList.add('hidden');
-      } else {
-        container.innerHTML = '';
-        leverWrapper.classList.remove('hidden');
-      }
-    }
-    
-    // Pull lever
-    function pullLever() {
-      if (gameState.isSpinning) return;
-      
-      const leverHandle = document.getElementById('lever-handle');
-      if (leverHandle) {
-        leverHandle.style.animation = 'none';
-        setTimeout(() => {
-          leverHandle.style.animation = 'leverPull 0.6s ease-in-out';
-        }, 10);
-      }
-      
-      spin();
-    }
-    
-    // Adjust bet
-    function adjustBet(amount) {
-      const newBet = gameState.bet + amount;
-      if (newBet >= 10 && newBet <= Math.min(1000, gameState.balance)) {
-        gameState.bet = newBet;
-        document.getElementById('bet-display').textContent = gameState.bet;
-      }
-    }
-    
-    // Max bet
-    function maxBet() {
-      gameState.bet = Math.min(1000, gameState.balance);
-      document.getElementById('bet-display').textContent = gameState.bet;
-    }
-    
-    // Spin the reels
-    async function spin() {
-      if (gameState.isSpinning) return;
-      if (gameState.balance < gameState.bet) {
-        showToast('Nicht genug Credits! 💸', 'error');
-        return;
-      }
-      
-      gameState.isSpinning = true;
-      gameState.balance -= gameState.bet;
-      gameState.totalSpins++;
-      updateDisplay();
-      
-      // Disable controls
-      if (gameState.controlMode === 'button') {
-        const spinBtn = document.getElementById('spin-button');
-        if (spinBtn) spinBtn.disabled = true;
-      }
-      
-      playSpinSound();
-      
-      // Hide win text
-      document.getElementById('win-text').classList.add('hidden');
-      
-      // Generate results
-      const results = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
-      
-      // Animate reels
-      const reels = [
-        document.getElementById('reel-1'),
-        document.getElementById('reel-2'),
-        document.getElementById('reel-3')
-      ];
-      
-      // Spin animation
-      for (let i = 0; i < 3; i++) {
-        await animateReel(reels[i], results[i], 1000 + i * 300);
-      }
-      
-      // Check win
-      const combo = results.join('');
-      let win = 0;
-      let isJackpot = false;
-      
-      if (paytable[combo]) {
-        if (paytable[combo].multiplier === 0) {
-          // Jackpot!
-          win = gameState.jackpot;
-          isJackpot = true;
-          gameState.jackpotsWon++;
-          playJackpotSound();
-          createCoinExplosion(50);
-          showToast('🎰 JACKPOT! 🎰', 'jackpot');
-        } else {
-          win = gameState.bet * paytable[combo].multiplier;
-          playWinSound();
-          createCoinExplosion(10);
-        }
-        
-        gameState.balance += win;
-        gameState.totalWins += win;
-        
-        // Show win animation
-        const winText = document.getElementById('win-text');
-        winText.textContent = `+${win.toLocaleString()}`;
-        winText.classList.remove('hidden');
-        winText.parentElement.classList.add('win-animation');
-        
-        setTimeout(() => {
-          winText.parentElement.classList.remove('win-animation');
-        }, 2500);
-      }
-      
-      // Reset jackpot if won
-      if (isJackpot) {
-        gameState.jackpot = 10000;
-        gameState.jackpotTimer = 600;
-        updateJackpotDisplay();
-      }
-      
-      updateDisplay();
-      await saveGame();
-      
-      gameState.isSpinning = false;
-      
-      // Re-enable controls
-      if (gameState.controlMode === 'button') {
-        const spinBtn = document.getElementById('spin-button');
-        if (spinBtn) spinBtn.disabled = false;
-      }
-      
-      // Continue auto spin
-      if (gameState.autoSpin && gameState.balance >= gameState.bet) {
-        setTimeout(spin, 1000);
-      } else if (gameState.autoSpin) {
-        gameState.autoSpin = false;
-        document.getElementById('auto-spin-btn').textContent = '🔄 Auto-Spin: AUS';
-      }
-    }
-    
-    // Animate a single reel
-    function animateReel(reel, finalSymbol, duration) {
-      return new Promise(resolve => {
-        const startTime = Date.now();
-        const spinInterval = 50;
-        
-        const interval = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          
-          if (elapsed < duration) {
-            reel.innerHTML = `<div class="slot-symbol text-5xl md:text-6xl flex items-center justify-center h-24 md:h-28">${getRandomSymbol()}</div>`;
-          } else {
-            clearInterval(interval);
-            reel.innerHTML = `<div class="slot-symbol text-5xl md:text-6xl flex items-center justify-center h-24 md:h-28">${finalSymbol}</div>`;
-            resolve();
-          }
-        }, spinInterval);
-      });
-    }
-    
-    // Toggle auto spin
-    function toggleAutoSpin() {
-      gameState.autoSpin = !gameState.autoSpin;
-      const btn = document.getElementById('auto-spin-btn');
-      btn.textContent = gameState.autoSpin ? '🔄 Auto-Spin: AN' : '🔄 Auto-Spin: AUS';
-      
-      if (gameState.autoSpin && !gameState.isSpinning) {
-        spin();
-      }
-    }
-    
-    // Create coin explosion effect
-    function createCoinExplosion(count) {
-      const container = document.getElementById('coin-particles');
-      
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-          const coin = document.createElement('div');
-          coin.className = 'coin-particle';
-          coin.textContent = '🪙';
-          coin.style.left = `${30 + Math.random() * 40}%`;
-          coin.style.top = `${30 + Math.random() * 20}%`;
-          container.appendChild(coin);
-          
-          setTimeout(() => coin.remove(), 1000);
-        }, i * 50);
-      }
-    }
-    
-    // Update display
-    function updateDisplay() {
-      document.getElementById('balance-display').textContent = gameState.balance.toLocaleString();
-      document.getElementById('total-spins').textContent = gameState.totalSpins.toLocaleString();
-      document.getElementById('total-wins').textContent = gameState.totalWins.toLocaleString();
-      document.getElementById('jackpots-won').textContent = gameState.jackpotsWon;
-      document.getElementById('current-skin-name').textContent = skins[gameState.currentSkin].name;
-    }
-    
-    // Update jackpot display
-    function updateJackpotDisplay() {
-      document.getElementById('jackpot-display').textContent = gameState.jackpot.toLocaleString();
-      
-      const minutes = Math.floor(gameState.jackpotTimer / 60);
-      const seconds = gameState.jackpotTimer % 60;
-      document.getElementById('jackpot-timer').textContent = 
-        `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    // Jackpot timer
-    function startJackpotTimer() {
-      setInterval(() => {
-        gameState.jackpotTimer--;
-        
-        if (gameState.jackpotTimer <= 0) {
-          // Reset and increase jackpot
-          gameState.jackpotTimer = 600;
-          gameState.jackpot += Math.floor(Math.random() * 5000) + 5000;
-        }
-        
-        updateJackpotDisplay();
-      }, 1000);
-    }
-    
-    // Show modal
-    function showModal(type) {
-      const container = document.getElementById('modal-container');
-      const content = document.getElementById('modal-content');
-      
-      let html = '';
-      
-      switch(type) {
-        case 'shop':
-          html = generateShopHTML();
-          break;
-        case 'exchange':
-          html = generateExchangeHTML();
-          break;
-        case 'paytable':
-          html = generatePaytableHTML();
-          break;
-        case 'stats':
-          html = generateStatsHTML();
-          break;
-      }
-      
-      content.innerHTML = html;
-      container.classList.remove('hidden');
-    }
-    
-    // Hide modal
-    function hideModal() {
-      document.getElementById('modal-container').classList.add('hidden');
-    }
-    
-    // Generate Shop HTML
-    function generateShopHTML() {
-      let skinsHTML = '';
-      for (const [id, skin] of Object.entries(skins)) {
-        const owned = gameState.ownedSkins.includes(id);
-        const active = gameState.currentSkin === id;
-        skinsHTML += `
-          <div class="glass-panel rounded-xl p-4 border-2 ${active ? 'border-pink-500' : 'border-gray-600'}">
-            <div class="text-center mb-3">
-              <div class="w-16 h-16 mx-auto rounded-full border-4" style="border-color: ${skin.color}; box-shadow: 0 0 20px ${skin.color}"></div>
+
+        <div class="risk-area" id="risk-controls">
+            <div style="font-size: 0.9rem; margin-bottom: 5px;">GEWINN IM RISIKO:</div>
+            <div style="font-size: 1.5rem; color: #fff; margin-bottom: 10px;">
+                <span id="current-win-amount">0</span>€
             </div>
-            <h4 class="font-display text-lg text-white text-center">${skin.name}</h4>
-            <p class="text-yellow-400 text-center mb-3">${skin.price === 0 ? 'Gratis' : skin.price + ' 💰'}</p>
-            ${owned 
-              ? (active 
-                ? '<button class="w-full py-2 rounded-lg bg-pink-600 text-white font-bold" disabled>Aktiv</button>'
-                : `<button onclick="equipSkin('${id}')" class="w-full py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold">Ausrüsten</button>`)
-              : `<button onclick="buySkin('${id}')" class="w-full py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold">Kaufen</button>`
-            }
-          </div>
-        `;
-      }
-      
-      let bgsHTML = '';
-      for (const [id, bg] of Object.entries(backgrounds)) {
-        const owned = gameState.ownedBgs.includes(id);
-        const active = gameState.currentBg === id;
-        bgsHTML += `
-          <div class="glass-panel rounded-xl p-4 border-2 ${active ? 'border-cyan-500' : 'border-gray-600'}">
-            <div class="w-full h-16 rounded-lg bg-${id} mb-3"></div>
-            <h4 class="font-display text-lg text-white text-center">${bg.name}</h4>
-            <p class="text-yellow-400 text-center mb-3">${bg.price === 0 ? 'Gratis' : bg.price + ' 💰'}</p>
-            ${owned 
-              ? (active 
-                ? '<button class="w-full py-2 rounded-lg bg-cyan-600 text-white font-bold" disabled>Aktiv</button>'
-                : `<button onclick="equipBg('${id}')" class="w-full py-2 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold">Ausrüsten</button>`)
-              : `<button onclick="buyBg('${id}')" class="w-full py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold">Kaufen</button>`
-            }
-          </div>
-        `;
-      }
-      
-      return `
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="font-display text-3xl text-pink-400 neon-text">🛒 SHOP</h2>
-          <button onclick="hideModal()" class="text-3xl text-gray-400 hover:text-white">✕</button>
-        </div>
-        
-        <div class="mb-4 text-center">
-          <span class="text-gray-400">Dein Guthaben:</span>
-          <span class="font-display text-2xl text-green-400 ml-2">${gameState.balance.toLocaleString()} 💰</span>
-        </div>
-        
-        <h3 class="font-display text-xl text-cyan-400 mb-4">🎨 Automaten Skins</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          ${skinsHTML}
-        </div>
-        
-        <h3 class="font-display text-xl text-cyan-400 mb-4">🌃 Hintergründe</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          ${bgsHTML}
-        </div>
-      `;
-    }
-    
-    // Generate Exchange HTML
-    function generateExchangeHTML() {
-      return `
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="font-display text-3xl text-yellow-400 neon-text">💱 GELDWECHSLER</h2>
-          <button onclick="hideModal()" class="text-3xl text-gray-400 hover:text-white">✕</button>
-        </div>
-        
-        <div class="glass-panel rounded-2xl p-6 mb-6 border-2 border-yellow-500" style="box-shadow: 0 0 30px rgba(255,215,0,0.3)">
-          <div class="text-center mb-6">
-            <div class="text-6xl mb-4">🏧</div>
-            <h3 class="font-display text-2xl text-yellow-400">Virtueller Geldwechsler</h3>
-            <p class="text-gray-400 mt-2">Wechselkurs: 1:1 (Keine Gebühren!)</p>
-          </div>
-          
-          <div class="mb-4 text-center">
-            <span class="text-gray-400">Aktuelles Guthaben:</span>
-            <span class="font-display text-3xl text-green-400 block mt-2">${gameState.balance.toLocaleString()} 💰</span>
-          </div>
-          
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="text-center">
-              <label class="text-gray-400 block mb-2">Von (Einheit A)</label>
-              <input type="number" id="exchange-from" value="100" min="1" max="${gameState.balance}" 
-                class="w-full bg-black border-2 border-yellow-500 rounded-lg px-4 py-3 text-center font-display text-xl text-yellow-400 focus:outline-none focus:border-green-400"
-                oninput="updateExchangePreview()">
+            
+            <div id="card-display" class="risk-card">🃏</div>
+
+            <div>
+                <button class="take-btn" onclick="collectWin()">NEHMEN</button>
+                <button class="risk-btn" onclick="gamble()">RISIKO (x2)</button>
             </div>
-            <div class="text-center">
-              <label class="text-gray-400 block mb-2">Zu (Einheit B)</label>
-              <input type="number" id="exchange-to" readonly
-                class="w-full bg-black border-2 border-green-500 rounded-lg px-4 py-3 text-center font-display text-xl text-green-400">
-            </div>
-          </div>
-          
-          <div class="flex justify-center gap-2 text-4xl mb-6">
-            <span>💵</span>
-            <span class="text-yellow-400">→</span>
-            <span>💶</span>
-          </div>
-          
-          <button onclick="performExchange()" class="w-full py-4 rounded-xl font-display text-xl font-black bg-gradient-to-r from-yellow-600 to-green-600 text-white hover:from-yellow-500 hover:to-green-500 transition-all">
-            💱 WECHSELN
-          </button>
         </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const symbols = ['🍒', '🍋', '🍇', '💎', '7️⃣', '🔔'];
+        const costPerSpin = 10;
+        let money = 100;
+        let currentWin = 0; // Geld das gerade im Risiko hängt
+        let currentUser = null;
         
-        <div class="grid grid-cols-3 gap-4">
-          <button onclick="quickExchange(100)" class="glass-panel rounded-xl py-3 text-yellow-400 hover:text-green-400 font-display">+100</button>
-          <button onclick="quickExchange(500)" class="glass-panel rounded-xl py-3 text-yellow-400 hover:text-green-400 font-display">+500</button>
-          <button onclick="quickExchange(1000)" class="glass-panel rounded-xl py-3 text-yellow-400 hover:text-green-400 font-display">+1000</button>
-        </div>
+        // --- AUDIO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        <p class="text-gray-500 text-center mt-4 text-sm">* Dies ist ein virtueller Geldwechsler für das Spielerlebnis</p>
-      `;
-    }
-    
-    // Generate Paytable HTML
-    function generatePaytableHTML() {
-      let rows = '';
-      for (const [combo, info] of Object.entries(paytable)) {
-        const symbols = combo.match(/.{1,2}/g) || [];
-        rows += `
-          <tr class="border-b border-gray-700">
-            <td class="py-3 text-3xl">${symbols.join(' ')}</td>
-            <td class="py-3 text-cyan-400">${info.name}</td>
-            <td class="py-3 text-yellow-400 font-display text-xl">
-              ${info.multiplier === 0 ? '🎰 JACKPOT!' : `${info.multiplier}x`}
-            </td>
-          </tr>
-        `;
-      }
-      
-      return `
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="font-display text-3xl text-cyan-400 neon-text">📊 GEWINNTABELLE</h2>
-          <button onclick="hideModal()" class="text-3xl text-gray-400 hover:text-white">✕</button>
-        </div>
-        
-        <div class="glass-panel rounded-xl p-4 mb-6">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b-2 border-pink-500">
-                <th class="py-2 text-left text-pink-400">Kombination</th>
-                <th class="py-2 text-left text-pink-400">Name</th>
-                <th class="py-2 text-left text-pink-400">Gewinn</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="glass-panel rounded-xl p-4">
-          <h3 class="font-display text-xl text-yellow-400 mb-3">💡 Spielregeln</h3>
-          <ul class="text-gray-300 space-y-2">
-            <li>• Setze deinen Einsatz (10-1000 Credits)</li>
-            <li>• Drehe die Walzen mit dem DREHEN Button oder Hebel</li>
-            <li>• 3 gleiche Symbole = Gewinn!</li>
-            <li>• Der Jackpot erhöht sich alle 10 Minuten</li>
-            <li>• 🎰🎰🎰 gewinnt den aktuellen Jackpot!</li>
-            <li>• Schalte zwischen Hebel und Knopf um!</li>
-          </ul>
-        </div>
-      `;
-    }
-    
-    // Generate Stats HTML
-    function generateStatsHTML() {
-      const winRate = gameState.totalSpins > 0 
-        ? ((gameState.totalWins / (gameState.totalSpins * gameState.bet)) * 100).toFixed(1)
-        : 0;
-      
-      return `
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="font-display text-3xl text-green-400 neon-text">📈 STATISTIKEN</h2>
-          <button onclick="hideModal()" class="text-3xl text-gray-400 hover:text-white">✕</button>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <div class="glass-panel rounded-xl p-4 text-center border-2 border-cyan-500">
-            <div class="text-4xl mb-2">🎰</div>
-            <div class="font-display text-3xl text-cyan-400">${gameState.totalSpins.toLocaleString()}</div>
-            <div class="text-gray-400">Gesamte Spins</div>
-          </div>
-          
-          <div class="glass-panel rounded-xl p-4 text-center border-2 border-green-500">
-            <div class="text-4xl mb-2">💰</div>
-            <div class="font-display text-3xl text-green-400">${gameState.totalWins.toLocaleString()}</div>
-            <div class="text-gray-400">Gesamte Gewinne</div>
-          </div>
-          
-          <div class="glass-panel rounded-xl p-4 text-center border-2 border-yellow-500">
-            <div class="text-4xl mb-2">������</div>
-            <div class="font-display text-3xl text-yellow-400">${gameState.jackpotsWon}</div>
-            <div class="text-gray-400">Jackpots Gewonnen</div>
-          </div>
-          
-          <div class="glass-panel rounded-xl p-4 text-center border-2 border-pink-500">
-            <div class="text-4xl mb-2">📊</div>
-            <div class="font-display text-3xl text-pink-400">${winRate}%</div>
-            <div class="text-gray-400">Gewinnrate</div>
-          </div>
-        </div>
-        
-        <div class="glass-panel rounded-xl p-4 mb-4">
-          <h3 class="font-display text-xl text-cyan-400 mb-3">🎨 Ausrüstung</h3>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-400">Aktueller Skin:</span>
-            <span class="text-pink-400 font-bold">${skins[gameState.currentSkin].name}</span>
-          </div>
-          <div class="flex justify-between items-center mt-2">
-            <span class="text-gray-400">Aktueller Hintergrund:</span>
-            <span class="text-cyan-400 font-bold">${backgrounds[gameState.currentBg].name}</span>
-          </div>
-          <div class="flex justify-between items-center mt-2">
-            <span class="text-gray-400">Steuerung:</span>
-            <span class="text-yellow-400 font-bold">${gameState.controlMode === 'button' ? '🔘 Knopf' : '🎚️ Hebel'}</span>
-          </div>
-        </div>
-        
-        <div class="glass-panel rounded-xl p-4">
-          <h3 class="font-display text-xl text-yellow-400 mb-3">�� Besitz</h3>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-400">Skins:</span>
-            <span class="text-green-400 font-bold">${gameState.ownedSkins.length} / ${Object.keys(skins).length}</span>
-          </div>
-          <div class="flex justify-between items-center mt-2">
-            <span class="text-gray-400">Hintergründe:</span>
-            <span class="text-green-400 font-bold">${gameState.ownedBgs.length} / ${Object.keys(backgrounds).length}</span>
-          </div>
-        </div>
-      `;
-    }
-    
-    // Update exchange preview
-    function updateExchangePreview() {
-      const fromInput = document.getElementById('exchange-from');
-      const toInput = document.getElementById('exchange-to');
-      
-      if (fromInput && toInput) {
-        const value = parseInt(fromInput.value) || 0;
-        toInput.value = value;
-      }
-    }
-    
-    // Quick exchange
-    function quickExchange(amount) {
-      const fromInput = document.getElementById('exchange-from');
-      if (fromInput) {
-        fromInput.value = Math.min(amount, gameState.balance);
-        updateExchangePreview();
-      }
-    }
-    
-    // Perform exchange
-    function performExchange() {
-      showToast('Wechsel erfolgreich! 💱', 'success');
-    }
-    
-    // Buy skin
-    async function buySkin(id) {
-      const skin = skins[id];
-      if (gameState.balance >= skin.price) {
-        gameState.balance -= skin.price;
-        gameState.ownedSkins.push(id);
-        gameState.currentSkin = id;
-        applySkin(id);
-        updateDisplay();
-        await saveGame();
-        showModal('shop');
-        showToast(`${skin.name} gekauft! 🎨`, 'success');
-      } else {
-        showToast('Nicht genug Credits! 💸', 'error');
-      }
-    }
-    
-    // Equip skin
-    async function equipSkin(id) {
-      gameState.currentSkin = id;
-      applySkin(id);
-      updateDisplay();
-      await saveGame();
-      showModal('shop');
-    }
-    
-    // Apply skin
-    function applySkin(id) {
-      const app = document.getElementById('app');
-      Object.keys(skins).forEach(s => app.classList.remove(`skin-${s}`));
-      app.classList.add(`skin-${id}`);
-    }
-    
-    // Buy background
-    async function buyBg(id) {
-      const bg = backgrounds[id];
-      if (gameState.balance >= bg.price) {
-        gameState.balance -= bg.price;
-        gameState.ownedBgs.push(id);
-        gameState.currentBg = id;
-        applyBg(id);
-        updateDisplay();
-        await saveGame();
-        showModal('shop');
-        showToast(`${bg.name} gekauft! 🌃`, 'success');
-      } else {
-        showToast('Nicht genug Credits! 💸', 'error');
-      }
-    }
-    
-    // Equip background
-    async function equipBg(id) {
-      gameState.currentBg = id;
-      applyBg(id);
-      updateDisplay();
-      await saveGame();
-      showModal('shop');
-    }
-    
-    // Apply background
-    function applyBg(id) {
-      const body = document.body;
-      Object.keys(backgrounds).forEach(b => body.classList.remove(`bg-${b}`));
-      body.classList.add(`bg-${id}`);
-    }
-    
-    // Show toast notification
-    function showToast(message, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl font-display text-lg z-50 ${
-        type === 'success' ? 'bg-green-600' : 
-        type === 'error' ? 'bg-red-600' : 
-        type === 'jackpot' ? 'bg-gradient-to-r from-pink-600 via-yellow-500 to-cyan-500' :
-        'bg-cyan-600'
-      } text-white shadow-2xl`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
-        setTimeout(() => toast.remove(), 300);
-      }, 2000);
-    }
-    
-    // Save game to Data SDK
-    async function saveGame() {
-      if (!window.dataSdk) return;
-      
-      const data = {
-        player_id: gameState.playerId || 'player_1',
-        balance: gameState.balance,
-        total_wins: gameState.totalWins,
-        total_spins: gameState.totalSpins,
-        jackpots_won: gameState.jackpotsWon,
-        current_skin: gameState.currentSkin,
-        current_bg: gameState.currentBg,
-        owned_skins: gameState.ownedSkins.join(','),
-        owned_bgs: gameState.ownedBgs.join(','),
-        music_enabled: gameState.musicEnabled,
-        control_mode: gameState.controlMode,
-        last_played: new Date().toISOString()
-      };
-      
-      if (playerData) {
-        const result = await window.dataSdk.update({ ...data, __backendId: playerData.__backendId });
-        if (!result.isOk) {
-          console.error('Failed to save game');
-        }
-      } else {
-        const result = await window.dataSdk.create(data);
-        if (!result.isOk) {
-          console.error('Failed to create save');
-        }
-      }
-    }
-    
-    // Load game from Data SDK
-    function loadGame(data) {
-      if (data && data.length > 0) {
-        playerData = data[0];
-        gameState.playerId = playerData.player_id;
-        gameState.balance = playerData.balance || 1000;
-        gameState.totalWins = playerData.total_wins || 0;
-        gameState.totalSpins = playerData.total_spins || 0;
-        gameState.jackpotsWon = playerData.jackpots_won || 0;
-        gameState.currentSkin = playerData.current_skin || 'classic';
-        gameState.currentBg = playerData.current_bg || 'cyber';
-        gameState.ownedSkins = playerData.owned_skins ? playerData.owned_skins.split(',') : ['classic'];
-        gameState.ownedBgs = playerData.owned_bgs ? playerData.owned_bgs.split(',') : ['cyber'];
-        gameState.musicEnabled = playerData.music_enabled !== false;
-        gameState.controlMode = playerData.control_mode || 'button';
-        
-        applySkin(gameState.currentSkin);
-        applyBg(gameState.currentBg);
-        renderSpinControl();
-        setControlMode(gameState.controlMode);
-      }
-      updateDisplay();
-    }
-    
-    // Data handler
-    const dataHandler = {
-      onDataChanged(data) {
-        loadGame(data);
-      }
-    };
-    
-    // Element SDK config change handler
-    async function onConfigChange(newConfig) {
-      config = { ...config, ...newConfig };
-      
-      document.getElementById('casino-title').textContent = '🎰 ' + (config.casino_name || defaultConfig.casino_name);
-      document.getElementById('welcome-text').textContent = config.welcome_text || defaultConfig.welcome_text;
-    }
-    
-    // Initialize
-    async function init() {
-      // Initialize Element SDK
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange,
-          mapToCapabilities: (cfg) => ({
-            recolorables: [
-              {
-                get: () => cfg.primary_color || defaultConfig.primary_color,
-                set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
-              },
-              {
-                get: () => cfg.secondary_color || defaultConfig.secondary_color,
-                set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
-              },
-              {
-                get: () => cfg.accent_color || defaultConfig.accent_color,
-                set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
-              },
-              {
-                get: () => cfg.text_color || defaultConfig.text_color,
-                set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-              },
-              {
-                get: () => cfg.background_color || defaultConfig.background_color,
-                set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
-              }
-            ],
-            borderables: [],
-            fontEditable: {
-              get: () => cfg.font_family || defaultConfig.font_family,
-              set: (v) => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
-            },
-            fontSizeable: {
-              get: () => cfg.font_size || defaultConfig.font_size,
-              set: (v) => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'spin') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+                gainNode.gain.setValueAtTime(0.05, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(); osc.stop(now + 0.1);
+            } else if (type === 'win') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(500, now);
+                osc.frequency.linearRampToValueAtTime(1000, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(); osc.stop(now + 0.3);
+            } else if (type === 'gamble_win') {
+                // Hoher Ton für verdoppelt
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.linearRampToValueAtTime(1200, now + 0.2);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(); osc.stop(now + 0.4);
+            } else if (type === 'gamble_lose') {
+                // Tiefer Crash Ton
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.4);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(); osc.stop(now + 0.4);
+            } else if (type === 'cash') {
+                // Münzgeräusch
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(); osc.stop(now + 0.2);
             }
-          }),
-          mapToEditPanelValues: (cfg) => new Map([
-            ['casino_name', cfg.casino_name || defaultConfig.casino_name],
-            ['welcome_text', cfg.welcome_text || defaultConfig.welcome_text]
-          ])
-        });
-      }
-      
-      // Initialize Data SDK
-      if (window.dataSdk) {
-        const result = await window.dataSdk.init(dataHandler);
-        if (!result.isOk) {
-          console.error('Failed to initialize data SDK');
         }
-      }
-      
-      // Start jackpot timer
-      startJackpotTimer();
-      
-      // Render initial spin control
-      renderSpinControl();
-      
-      // Update initial display
-      updateDisplay();
-      updateJackpotDisplay();
-      
-      // Update exchange preview
-      setTimeout(updateExchangePreview, 100);
-      
-      // Click outside modal to close
-      document.getElementById('modal-container').addEventListener('click', (e) => {
-        if (e.target.id === 'modal-container') {
-          hideModal();
+
+        // --- CORE GAME ---
+        function updateUI() {
+            document.getElementById('money').innerText = money;
+            document.getElementById('current-win-amount').innerText = currentWin;
+            
+            if(currentUser) {
+                localStorage.setItem('neonSlot_' + currentUser, money);
+                localStorage.setItem('neonSlotColor_' + currentUser, getComputedStyle(document.documentElement).getPropertyValue('--neon-color'));
+            }
         }
-      });
-    }
-    
-    init();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c91ee2c3484c7b3',t:'MTc3MDI4OTUwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+        function getRandomSymbol() {
+            return symbols[Math.floor(Math.random() * symbols.length)];
+        }
+
+        async function spin() {
+            if (money < costPerSpin) {
+                document.getElementById('message-area').innerText = "Zu wenig Geld!";
+                return;
+            }
+
+            // UI Reset
+            document.getElementById('risk-controls').style.display = 'none';
+            document.getElementById('main-controls').style.display = 'flex';
+            document.getElementById('message-area').style.color = "white";
+
+            money -= costPerSpin;
+            updateUI();
+            
+            const btn = document.getElementById('spin-btn');
+            btn.disabled = true;
+            document.getElementById('message-area').innerText = "Walzen drehen...";
+
+            const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+            reels.forEach(r => r.classList.add('spinning'));
+
+            let results = [];
+            for (let i = 0; i < 3; i++) {
+                await new Promise(r => setTimeout(r, 400 + (i * 200)));
+                playSound('spin');
+                reels[i].classList.remove('spinning');
+                const symbol = getRandomSymbol();
+                reels[i].innerHTML = `<span>${symbol}</span>`;
+                results.push(symbol);
+            }
+
+            checkWin(results);
+            btn.disabled = false;
+        }
+
+        function checkWin(results) {
+            const [r1, r2, r3] = results;
+            let winAmount = 0;
+
+            if (r1 === r2 && r2 === r3) {
+                // 3 Gleiche
+                if (r1 === '7️⃣') winAmount = 200;
+                else if (r1 === '💎') winAmount = 100;
+                else winAmount = 50;
+            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+                // 2 Gleiche
+                winAmount = 15;
+            }
+
+            if (winAmount > 0) {
+                currentWin = winAmount;
+                document.getElementById('message-area').innerText = `GEWINN: ${winAmount}€ - Risiko?`;
+                document.getElementById('message-area').style.color = "#00ff00";
+                playSound('win');
+                showRiskMode(); // Hier startet der Risiko-Modus
+            } else {
+                document.getElementById('message-area').innerText = "Nichts gewonnen.";
+            }
+        }
+
+        // --- RISK MECHANIC ---
+        function showRiskMode() {
+            document.getElementById('main-controls').style.display = 'none';
+            document.getElementById('risk-controls').style.display = 'block';
+            document.getElementById('card-display').innerText = "🃏";
+            updateUI();
+        }
+
+        function collectWin() {
+            money += currentWin;
+            currentWin = 0;
+            playSound('cash');
+            document.getElementById('message-area').innerText = "Gewinn angenommen!";
+            endRiskMode();
+        }
+
+        function endRiskMode() {
+            document.getElementById('risk-controls').style.display = 'none';
+            document.getElementById('main-controls').style.display = 'flex';
+            updateUI();
+        }
+
+        async function gamble() {
+            const cardDisplay = document.getElementById('card-display');
+            
+            // Animation Sim
+            cardDisplay.innerText = "🔄";
+            await new Promise(r => setTimeout(r, 400));
+
+            // 50/50 Chance
+            const isWin = Math.random() > 0.5;
+
+            if (isWin) {
+                currentWin *= 2;
+                cardDisplay.innerText = Math.random() > 0.5 ? "🔴" : "⚫"; // Zufällige Farbe zeigen
+                cardDisplay.style.color = "white"; // Reset
+                playSound('gamble_win');
+                document.getElementById('message-area').innerText = "VERDOPPELT!";
+                updateUI();
+                // Risiko bleibt offen für weitere Verdopplung
+            } else {
+                currentWin = 0;
+                cardDisplay.innerText = "❌";
+                playSound('gamble_lose');
+                document.getElementById('message-area').innerText = "Alles verloren...";
+                document.getElementById('message-area').style.color = "red";
+                updateUI();
+                setTimeout(endRiskMode, 1000); // Kurz warten dann schließen
+            }
+        }
+
+        // --- SYSTEM ---
+        function login() {
+            const val = document.getElementById('username').value.trim();
+            if (!val) return alert("Name?");
+            currentUser = val;
+            document.getElementById('player-name').innerText = currentUser;
+            document.getElementById('login-overlay').classList.add('hidden');
+
+            const savedMoney = localStorage.getItem('neonSlot_' + currentUser);
+            const savedColor = localStorage.getItem('neonSlotColor_' + currentUser);
+
+            if (savedMoney) money = parseInt(savedMoney);
+            if (savedColor) changeColor(savedColor);
+            updateUI();
+        }
+
+        function toggleSettings() {
+            document.getElementById('settings-overlay').classList.toggle('hidden');
+        }
+
+        function changeColor(c) {
+            document.documentElement.style.setProperty('--neon-color', c);
+            if(currentUser) localStorage.setItem('neonSlotColor_' + currentUser, c);
+        }
+    </script>
+</body>
 </html>
