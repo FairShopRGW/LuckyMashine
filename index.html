@@ -320,6 +320,52 @@
       background: rgba(255,255,255,0.1);
       color: #999;
     }
+   Center reels, symbols and win display */
+#slot-container {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* vertikal zentrieren */
+  gap: 0.5rem; /* bereits vorhanden, ggf. anpassen */
+}
+
+.slot-reel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.slot-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* wichtig damit jedes Symbol in der Mitte steht */
+  justify-content: center;
+  width: 100%;
+  transition: transform 0.1s ease-out;
+}
+
+.slot-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Win-Text / Win-Display immer zentrieren */
+#win-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem; /* Höhe beibehalten oder anpassen */
+}
+
+/* Optional: damit animierte/wechselnde Inhalte nicht die Breite verschieben */
+.slot-reel,
+.slot-symbol {
+  min-width: 4.5rem; /* sorgt für konstante Breite; an deine Größe anpassen */
+  max-width: 6rem;
+}
   </style>
   <style>@view-transition { navigation: auto; }</style>
  </head>
