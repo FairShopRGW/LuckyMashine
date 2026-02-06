@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Slots - Jackpot & Music Edition</title>
+    <title>Neon Slots - Lever & Menu Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
@@ -25,7 +25,7 @@
             overflow: hidden;
         }
 
-        /* Jackpot Banner */
+        /* Jackpot & Banner */
         .jackpot-banner {
             position: absolute;
             top: 20px;
@@ -38,125 +38,162 @@
             box-shadow: 0 0 15px var(--jackpot-color);
         }
 
-        .jackpot-amount {
-            font-size: 2rem;
-            color: var(--jackpot-color);
-            text-shadow: 0 0 10px var(--jackpot-color);
-            display: block;
-        }
-
-        .jackpot-timer { font-size: 0.8rem; color: #aaa; }
+        .jackpot-amount { font-size: 2rem; color: var(--jackpot-color); text-shadow: 0 0 10px var(--jackpot-color); }
 
         .casino-container {
             background: #111;
-            padding: 30px;
+            padding: 40px;
             border: 2px solid var(--neon-color);
             border-radius: 20px;
             box-shadow: 0 0 20px var(--neon-color);
             text-align: center;
-            width: 450px;
+            width: 500px;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Slot Reels */
-        .slot-machine {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            gap: 10px;
-        }
+        /* Slot Maschine Layout */
+        .slot-row { display: flex; align-items: center; gap: 30px; margin: 20px 0; }
+
+        .slot-machine { display: flex; gap: 10px; }
 
         .reel {
-            width: 120px;
-            height: 120px;
-            background: #000;
-            border: 2px solid var(--neon-color);
-            border-radius: 10px;
-            font-size: 3.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            width: 100px; height: 120px;
+            background: #000; border: 2px solid var(--neon-color);
+            border-radius: 10px; font-size: 3rem;
+            display: flex; align-items: center; justify-content: center;
         }
 
         .spinning { animation: blur 0.1s infinite; }
         @keyframes blur { 0% { filter: blur(0); } 50% { filter: blur(4px); } 100% { filter: blur(0); } }
 
-        /* Buttons & Controls */
+        /* Der Hebel (Lever) */
+        .lever-container {
+            width: 40px; height: 150px;
+            position: relative; cursor: pointer;
+            display: none; /* Standardmäßig aus */
+        }
+
+        .lever-base {
+            width: 15px; height: 100px; background: #333;
+            margin: 0 auto; border-radius: 5px; position: relative;
+        }
+
+        .lever-arm {
+            width: 10px; height: 80px; background: #666;
+            position: absolute; top: 0; left: 2.5px;
+            transform-origin: bottom center; transition: 0.3s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        .lever-ball {
+            width: 30px; height: 30px; background: var(--neon-color);
+            border-radius: 50%; position: absolute; top: -15px; left: -10px;
+            box-shadow: 0 0 15px var(--neon-color);
+        }
+
+        .lever-pull .lever-arm { transform: rotateX(160deg); }
+
+        /* Buttons & Menu */
         button {
-            background: transparent;
-            color: var(--neon-color);
-            border: 2px solid var(--neon-color);
-            padding: 12px 25px;
-            font-family: 'Orbitron';
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: 0.3s;
+            background: transparent; color: var(--neon-color);
+            border: 2px solid var(--neon-color); padding: 12px 25px;
+            font-family: 'Orbitron'; cursor: pointer; text-transform: uppercase;
+            font-weight: bold; transition: 0.3s;
         }
 
         button:hover:not(:disabled) { background: var(--neon-color); color: #000; box-shadow: 0 0 20px var(--neon-color); }
-        button:disabled { opacity: 0.3; }
-
-        .risk-area { display: none; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; }
         
-        .music-toggle {
-            position: absolute; bottom: 10px; left: 10px;
-            font-size: 0.7rem; border: 1px solid #444; padding: 5px; color: #444;
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
         }
 
-        .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
+        .menu-card {
+            background: #1a1a1a; padding: 30px; border: 1px solid var(--neon-color);
+            border-radius: 10px; text-align: left; min-width: 300px;
         }
 
         .hidden { display: none !important; }
 
-        .stats { display: flex; justify-content: space-between; background: #000; padding: 10px; margin-bottom: 10px; border-radius: 5px;}
+        .stats { width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2rem; }
+        
+        .risk-area { display: none; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; width: 100%; }
     </style>
 </head>
 <body>
 
     <div id="jackpot-display" class="jackpot-banner">
-        <span class="jackpot-timer">NÄCHSTER JACKPOT-RESET: <span id="timer">10:00</span></span>
-        <span class="jackpot-amount">🎰 $<span id="jackpot-val">500.000</span> 🎰</span>
+        <div style="font-size: 0.7rem;">JACKPOT-RESET IN: <span id="timer">10:00</span></div>
+        <div class="jackpot-amount">🎰 $<span id="jackpot-val">0</span> 🎰</div>
     </div>
 
     <div id="start-overlay" class="overlay">
         <h1>NEON SLOTS</h1>
-        <p>Willkommen im 2026er Casino</p>
-        <input type="text" id="username" placeholder="Dein Name" style="padding:10px; margin-bottom:15px; background:transparent; border:1px solid var(--neon-color); color:white; font-family:'Orbitron'">
-        <button onclick="initGame()">SPIEL STARTEN & MUSIK AN</button>
+        <input type="text" id="username" placeholder="Dein Name" style="padding:15px; margin-bottom:15px; background:transparent; border:1px solid var(--neon-color); color:white; font-family:'Orbitron'; text-align:center;">
+        <button onclick="initGame()">Enter Casino</button>
+    </div>
+
+    <div id="menu-overlay" class="overlay hidden">
+        <div class="menu-card">
+            <h2 style="color: var(--neon-color); margin-top: 0;">MENÜ</h2>
+            
+            <p>Eingabemethode:</p>
+            <label><input type="radio" name="input-type" value="button" checked onchange="updateInputMethod()"> Neon-Button</label><br>
+            <label><input type="radio" name="input-type" value="lever" onchange="updateInputMethod()"> Mechanischer Hebel</label>
+            
+            <p>Farbe:</p>
+            <div style="display:flex; gap:10px;">
+                <div onclick="changeColor('#00ffff')" style="width:25px; height:25px; background:#00ffff; border-radius:50%; cursor:pointer;"></div>
+                <div onclick="changeColor('#ff00ff')" style="width:25px; height:25px; background:#ff00ff; border-radius:50%; cursor:pointer;"></div>
+                <div onclick="changeColor('#33ff33')" style="width:25px; height:25px; background:#33ff33; border-radius:50%; cursor:pointer;"></div>
+            </div>
+
+            <br><hr style="border:0; border-top:1px solid #444;">
+            <button onclick="resetAccount()" style="border-color:#ff3333; color:#ff3333; font-size:0.7rem; width:100%;">Account Reset</button>
+            <br><br>
+            <button onclick="toggleMenu()" style="width:100%;">Zurück zum Spiel</button>
+        </div>
     </div>
 
     <div class="casino-container">
+        <button onclick="toggleMenu()" style="position:absolute; top:10px; right:10px; border:none; font-size:1.5rem;">⚙️</button>
+        
         <div class="stats">
-            <div><span id="player-name">User</span></div>
+            <div><span id="player-name" style="color: var(--neon-color);">User</span></div>
             <div style="color: #33ff33;">$<span id="money">100</span></div>
         </div>
 
-        <div style="margin-bottom: 10px;">
-            EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 60px; background: #000; color: #00ffff; border: 1px solid #00ffff; font-family: 'Orbitron'; text-align: center;">
+        <div style="margin-bottom: 20px;">
+            EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 80px; background: #000; color: #fff; border: 1px solid var(--neon-color); font-family: 'Orbitron'; text-align: center; padding: 5px;">
         </div>
 
-        <div class="slot-machine">
-            <div class="reel" id="reel1">💎</div>
-            <div class="reel" id="reel2">💎</div>
-            <div class="reel" id="reel3">💎</div>
+        <div class="slot-row">
+            <div class="slot-machine">
+                <div class="reel" id="reel1">💎</div>
+                <div class="reel" id="reel2">💎</div>
+                <div class="reel" id="reel3">💎</div>
+            </div>
+
+            <div class="lever-container" id="lever-box" onclick="pullLever()">
+                <div class="lever-base">
+                    <div class="lever-arm"><div class="lever-ball"></div></div>
+                </div>
+            </div>
         </div>
 
-        <div id="main-controls">
-            <button id="spin-btn" onclick="spin()" style="width: 100%;">SPIN</button>
+        <div id="main-controls" style="width: 100%;">
+            <button id="spin-btn" onclick="spin()" style="width: 100%; height: 60px;">SPIN</button>
         </div>
 
         <div id="risk-controls" class="risk-area">
-            <div style="margin-bottom: 10px;">AKTUELLER GEWINN: <span id="win-sum" style="color: #33ff33;">0</span>€</div>
-            <button onclick="collect()" style="border-color: #33ff33; color: #33ff33;">NEHMEN</button>
-            <button onclick="gamble()" style="border-color: #ff3333; color: #ff3333;">RISIKO (x2)</button>
+            <div style="margin-bottom: 10px;">GEWINN: <span id="win-sum" style="color: #33ff33;">0</span>€</div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="collect()" style="flex:1; border-color: #33ff33; color: #33ff33;">NEHMEN</button>
+                <button onclick="gamble()" style="flex:1; border-color: #ff3333; color: #ff3333;">RISIKO (x2)</button>
+            </div>
         </div>
-
-        <button class="music-toggle" onclick="toggleMusic()">🎵 MUSIK TOGGLE</button>
-        <button onclick="resetGame()" style="font-size: 0.5rem; position: absolute; right: 10px; bottom: 10px; border: none; color: #444;">RESET ACC</button>
     </div>
 
     <script>
@@ -164,67 +201,10 @@
         let currentWin = 0;
         let currentUser = "";
         let jackpot = 0;
-        let jackpotTime = 600; // 10 Minuten
-        let audioStarted = false;
-        let bgOscillator;
+        let jackpotTime = 600;
+        let isSpinning = false;
 
-        // --- JACKPOT "API" LOGIC ---
-        function updateJackpotValue() {
-            // Simuliert einen API Fetch: Wert zwischen 10k und 1M
-            jackpot = Math.floor(Math.random() * (1000000 - 10000 + 1)) + 10000;
-            document.getElementById('jackpot-val').innerText = jackpot.toLocaleString();
-        }
-
-        function startJackpotTimer() {
-            setInterval(() => {
-                jackpotTime--;
-                if (jackpotTime <= 0) {
-                    jackpotTime = 600;
-                    updateJackpotValue();
-                }
-                const mins = Math.floor(jackpotTime / 60);
-                const secs = jackpotTime % 60;
-                document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            }, 1000);
-        }
-
-        // --- MUSIC ENGINE (Web Audio API) ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playBackgroundMusic() {
-            if (audioStarted) return;
-            audioStarted = true;
-            
-            // Simpler Neon-Synth Loop
-            const playNote = (freq, time, length) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(freq, time);
-                gain.gain.setValueAtTime(0.02, time);
-                gain.gain.exponentialRampToValueAtTime(0.0001, time + length);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(time);
-                osc.stop(time + length);
-            };
-
-            let tempo = 0;
-            setInterval(() => {
-                const now = audioCtx.currentTime;
-                // Bassline Loop
-                const notes = [55, 55, 65.41, 49]; // A1, C2, B1
-                playNote(notes[tempo % 4], now, 0.5);
-                tempo++;
-            }, 500);
-        }
-
-        function toggleMusic() {
-            if (audioCtx.state === 'running') audioCtx.suspend();
-            else audioCtx.resume();
-        }
-
-        // --- GAME LOGIC ---
+        // --- CORE ---
         function initGame() {
             const name = document.getElementById('username').value;
             if (!name) return alert("Name?");
@@ -232,25 +212,83 @@
             document.getElementById('player-name').innerText = name;
             document.getElementById('start-overlay').classList.add('hidden');
             
-            const saved = localStorage.getItem('neon_v2_' + currentUser);
+            const saved = localStorage.getItem('neon_v3_' + currentUser);
             if (saved) money = parseInt(saved);
             
             updateJackpotValue();
             startJackpotTimer();
-            playBackgroundMusic();
             updateUI();
         }
 
         function updateUI() {
             document.getElementById('money').innerText = money;
             document.getElementById('win-sum').innerText = currentWin;
-            localStorage.setItem('neon_v2_' + currentUser, money);
+            localStorage.setItem('neon_v3_' + currentUser, money);
+        }
+
+        // --- MENU LOGIC ---
+        function toggleMenu() {
+            document.getElementById('menu-overlay').classList.toggle('hidden');
+        }
+
+        function updateInputMethod() {
+            const method = document.querySelector('input[name="input-type"]:checked').value;
+            const btn = document.getElementById('main-controls');
+            const lever = document.getElementById('lever-box');
+            
+            if(method === 'lever') {
+                btn.style.display = 'none';
+                lever.style.display = 'block';
+            } else {
+                btn.style.display = 'block';
+                lever.style.display = 'none';
+            }
+        }
+
+        function changeColor(c) {
+            document.documentElement.style.setProperty('--neon-color', c);
+        }
+
+        function resetAccount() {
+            if(confirm("Spielstand löschen?")) {
+                localStorage.removeItem('neon_v3_' + currentUser);
+                location.reload();
+            }
+        }
+
+        // --- JACKPOT API ---
+        function updateJackpotValue() {
+            jackpot = Math.floor(Math.random() * (1000000 - 10000 + 1)) + 10000;
+            document.getElementById('jackpot-val').innerText = jackpot.toLocaleString();
+        }
+
+        function startJackpotTimer() {
+            setInterval(() => {
+                jackpotTime--;
+                if (jackpotTime <= 0) { jackpotTime = 600; updateJackpotValue(); }
+                const mins = Math.floor(jackpotTime / 60);
+                const secs = jackpotTime % 60;
+                document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }, 1000);
+        }
+
+        // --- SPIN LOGIC ---
+        function pullLever() {
+            if (isSpinning) return;
+            const lever = document.getElementById('lever-box');
+            lever.classList.add('lever-pull');
+            setTimeout(() => {
+                lever.classList.remove('lever-pull');
+                spin();
+            }, 300);
         }
 
         async function spin() {
+            if (isSpinning) return;
             const bet = parseInt(document.getElementById('bet-amount').value);
-            if (money < bet) return alert("Zu arm!");
+            if (money < bet) return alert("Kontostand zu niedrig!");
 
+            isSpinning = true;
             money -= bet;
             updateUI();
             
@@ -258,7 +296,7 @@
             const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
             reels.forEach(r => r.classList.add('spinning'));
 
-            const symbols = ['🍒', '🍋', '💎', '7️⃣', '🔔'];
+            const symbols = ['🍒', '🍋', '💎', '7️⃣', '🔔', '🍇'];
             let results = [];
 
             for (let i = 0; i < 3; i++) {
@@ -274,7 +312,7 @@
 
         function checkResults(res, bet) {
             if (res[0] === '7️⃣' && res[1] === '7️⃣' && res[2] === '7️⃣') {
-                alert("JACKPOT GEKNACKT!!!");
+                alert("!!! JACKPOT !!! " + jackpot + "€");
                 money += jackpot;
                 updateJackpotValue();
                 endGame();
@@ -291,6 +329,7 @@
 
         function startRisk() {
             document.getElementById('main-controls').classList.add('hidden');
+            document.getElementById('lever-box').style.opacity = '0.3';
             document.getElementById('risk-controls').style.display = 'block';
             updateUI();
         }
@@ -307,24 +346,19 @@
                 updateUI();
             } else {
                 currentWin = 0;
-                alert("Verloren!");
+                alert("Risiko verloren!");
                 endGame();
             }
         }
 
         function endGame() {
             currentWin = 0;
+            isSpinning = false;
             document.getElementById('main-controls').classList.remove('hidden');
+            document.getElementById('lever-box').style.opacity = '1';
             document.getElementById('risk-controls').style.display = 'none';
             document.getElementById('spin-btn').disabled = false;
             updateUI();
-        }
-
-        function resetGame() {
-            if(confirm("Alles löschen?")) {
-                localStorage.removeItem('neon_v2_' + currentUser);
-                location.reload();
-            }
         }
     </script>
 </body>
