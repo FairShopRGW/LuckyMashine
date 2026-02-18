@@ -294,12 +294,16 @@
                <button onclick="buyColor('#ff0000')">Kaufen</button>
            </div>
            <div class="shop-item">
-               <span>🌌 Hintergrund: Sterne - $200</span>
-               <button onclick="buyBackground('url(https://example.com/stars.jpg)')">Kaufen</button>
+               <span>🔴 Hintergrund: Neon Red - $200</span>
+               <button onclick="buyBackground('LuckyMashine/img/bg_red.jpeg')">Kaufen</button>
+           </div>
+            <div class="shop-item">
+               <span>🟣 Hintergrund: Neon Purple - $200</span>
+               <button onclick="buyBackground('LuckyMashine/img/bg_pink.ai')">Kaufen</button>
            </div>
            <div class="shop-item">
-               <span>🏙️ Hintergrund: Neon City - $200</span>
-               <button onclick="buyBackground('url(https://example.com/neon-city.jpg)')">Kaufen</button>
+               <span>🔵 Hintergrund: Neon Blue - $200</span>
+               <button onclick="buyBackground('LuckyMashine/img/bg_blue.jpeg')">Kaufen</button>
            </div>
            <div id="shop-message" style="margin-top:15px; min-height:40px; font-size:1.1rem;"></div>
        </div>
@@ -409,7 +413,7 @@
         if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
         money = 100;
         playerLevel = 1;
-        unlockedColors = ['#00ffff', '#ff00ff', '#33ff33'];
+        unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
         unlockedBackgrounds = ['#050505'];
         currentWin = 0;
         isSpinning = false;
