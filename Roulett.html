@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neon Roulette – Schwarz / Weiß (Verbessert)</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #0a0015;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e0e0ff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 3.5rem;
+      margin: 0.3em 0 0.5em;
+      background: linear-gradient(90deg, #ff00aa, #00ddff, #ff00aa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      background-size: 200%;
+      animation: glow 7s ease infinite;
+      text-shadow: 0 0 25px #ff00aa99, 0 0 50px #00ddff88;
+      letter-spacing: 3px;
+    }
+    @keyframes glow {
+      0%,100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .login, .game {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity 0.7s, visibility 0.7s;
+      backdrop-filter: blur(5px);
+    }
+    .hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    input[type="text"], input[type="number"] {
+      font-size: 1.6rem;
+      padding: 14px 28px;
+      width: 300px;
+      margin: 20px;
+      border: 2px solid #00eeff;
+      border-radius: 12px;
+      background: rgba(5,0,20,0.7);
+      color: #f0f0ff;
+      outline: none;
+      box-shadow: 0 0 20px #00eeff66;
+      text-align: center;
+    }
+    input:focus { border-color: #ff00aa; box-shadow: 0 0 30px #ff00aaaa; }
+    input[type="number"] { width: 200px; }
+    .bet-area {
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.4rem;
+    }
+    .bet-amount {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .bet-btn {
+      padding: 16px 48px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+    #betBlack { background: #111; color: white; }
+    #betWhite { background: #eee; color: #111; }
+    #betBlack.selected { box-shadow: 0 0 35px #ff3366, inset 0 0 15px #000; }
+    #betWhite.selected { box-shadow: 0 0 35px #00ffff, inset 0 0 15px #ddd; }
+    #balance {
+      font-size: 2.2rem;
+      margin: 10px 0 25px;
+      color: #00ffcc;
+      text-shadow: 0 0 15px #00ffcc;
+    }
+    .wheel-container {
+      position: relative;
+      width: 380px;
+      height: 380px;
+      margin: 20px 0;
+    }
+    #wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 10px solid #00eeff;
+      box-shadow:
+        0 0 40px #00eeffaa,
+        inset 0 0 60px #ff00aa44,
+        0 0 100px #ff00aaaa;
+      transition: transform 5s cubic-bezier(0.22, 0.9, 0.15, 1.05);
+      transform: rotate(0deg);
+    }
+    .segment {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(50% 50%, 100% 0%, 100% 100%);
+      transform-origin: 50% 50%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 30px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 10px black;
+    }
+    #resultOverlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      font-weight: bold;
+      text-shadow: 0 0 20px currentColor;
+      animation: pulse 1s ease-in-out infinite alternate;
+      z-index: 10;
+    }
+    @keyframes pulse {
+      from { transform: translate(-50%, -50%) scale(1); }
+      to { transform: translate(-50%, -50%) scale(1.1); }
+    }
+    #status {
+      font-size: 1.8rem;
+      margin: 30px 0;
+      min-height: 2.4em;
+      text-align: center;
+      text-shadow: 0 0 12px currentColor;
+    }
+    button.spin, button.reset {
+      font-size: 1.7rem;
+      padding: 18px 70px;
+      margin: 15px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(45deg, #ff00aa, #00eeff);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 35px #ff00aaaa;
+      transition: all 0.3s;
+    }
+    button.reset {
+      background: linear-gradient(45deg, #ff4444, #ffaa00);
+      box-shadow: 0 0 35px #ff4444aa;
+    }
+    button.spin:hover:not(:disabled), button.reset:hover:not(:disabled) {
+      transform: scale(1.08);
+      box-shadow: 0 0 55px #ff00aadd;
+    }
+    button.spin:disabled, button.reset:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .bankrupt {
+      animation: shake 0.5s ease-in-out infinite;
+      color: #ff4444 !important;
+      text-shadow: 0 0 20px #ff4444 !important;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+<div class="login" id="login">
+  <h1>NEON ROULETTE</h1>
+  <input type="text" id="nameInput" placeholder="Dein Name..." maxlength="16" autocomplete="off"/>
+  <button class="spin" onclick="startGame()">STARTEN</button>
+</div>
+<div class="game hidden" id="game">
+  <h1>NEON ROULETTE</h1>
+  <div id="balance">100 $</div>
+  <div class="bet-area">
+    <div class="bet-amount">
+      <label>Einsatz: </label>
+      <input type="number" id="betAmount" min="1" max="100" value="1" onchange="updateBetUI()">
+      <span style="font-size:1.2rem; color:#00ffcc">$</span>
+    </div>
+    <div style="display:flex; gap:40px;">
+      <button id="betBlack" class="bet-btn selected" onclick="selectBet('black')">SCHWARZ</button>
+      <button id="betWhite" class="bet-btn" onclick="selectBet('white')">WEISS</button>
+    </div>
+  </div>
+  <div class="wheel-container">
+    <div id="wheel"></div>
+    <div id="resultOverlay"></div>
+  </div>
+  <div id="status">Wähle Farbe & Einsatz → Drehen!</div>
+  <button class="spin" id="spinBtn" onclick="spin()">DREHEN</button>
+  <button class="reset hidden" id="resetBtn" onclick="resetGame()">NEUSTART (100$)</button>
+</div>
+<script>
+const STORAGE_KEY = "neonRoulette_v3";
+let player = {
+  name: "",
+  balance: 100,
+  betColor: "black",
+  betAmount: 1
+};
+const loginEl = document.getElementById("login");
+const gameEl = document.getElementById("game");
+const nameInput = document.getElementById("nameInput");
+const balanceEl = document.getElementById("balance");
+const betAmountInput = document.getElementById("betAmount");
+const statusEl = document.getElementById("status");
+const spinBtn = document.getElementById("spinBtn");
+const resetBtn = document.getElementById("resetBtn");
+const wheel = document.getElementById("wheel");
+const resultOverlay = document.getElementById("resultOverlay");
+let isSpinning = false;
+let audioCtx = null;
+
+// Web Audio API initialisieren
+function initAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+// Simple Sound-Funktionen
+function playSpinSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.5);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function playWinSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + 0.3);
+}
+
+function playLoseSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + 0.4);
+}
+
+// ────────────────────────────────────────────────
+function loadGame() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      player = JSON.parse(saved);
+      if (player.balance < 1) player.balance = 100;
+      if (player.betAmount < 1 || player.betAmount > 100) player.betAmount = 1;
+    } catch {}
+  }
+  nameInput.value = player.name;
+  betAmountInput.value = player.betAmount;
+}
+function saveGame() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(player));
+}
+function updateUI() {
+  balanceEl.textContent = player.balance.toFixed(0) + " $";
+  document.getElementById("betBlack").classList.toggle("selected", player.betColor === "black");
+  document.getElementById("betWhite").classList.toggle("selected", player.betColor === "white");
+  updateBetUI();
+  if (player.balance < player.betAmount) {
+    spinBtn.disabled = true;
+    statusEl.textContent = "Nicht genug Geld für diesen Einsatz!";
+  } else {
+    spinBtn.disabled = false;
+  }
+  if (player.balance <= 0) {
+    statusEl.classList.add("bankrupt");
+    statusEl.innerHTML = "BANKROTT! 😵";
+    resetBtn.classList.remove("hidden");
+    spinBtn.disabled = true;
+  } else {
+    statusEl.classList.remove("bankrupt");
+    resetBtn.classList.add("hidden");
+  }
+}
+function updateBetUI() {
+  const bet = parseInt(betAmountInput.value) || 1;
+  if (bet < 1) betAmountInput.value = 1;
+  if (bet > 100) betAmountInput.value = 100;
+  player.betAmount = bet;
+  saveGame();
+  updateUI();
+}
+function selectBet(color) {
+  if (isSpinning) return;
+  player.betColor = color;
+  updateUI();
+}
+function resetGame() {
+  player.balance = 100;
+  player.betAmount = 1;
+  saveGame();
+  updateUI();
+}
+function startGame() {
+  const name = nameInput.value.trim();
+  if (!name) {
+    alert("Bitte Namen eingeben");
+    return;
+  }
+  player.name = name;
+  saveGame();
+  loginEl.classList.add("hidden");
+  gameEl.classList.remove("hidden");
+  createWheel();
+  updateUI();
+  initAudio();
+}
+function createWheel() {
+  wheel.innerHTML = "";
+  const segments = 37;
+  const angleStep = 360 / segments;
+  for (let i = 0; i < segments; i++) {
+    const seg = document.createElement("div");
+    seg.className = "segment";
+    let color, text;
+    if (i === 0) {
+      color = "#00aa44"; // Grün / 0
+      text = "0";
+    } else {
+      const num = i;
+      color = (num % 2 === 1) ? "#111111" : "#eeeeee";
+      text = num;
+    }
+    seg.style.background = color;
+    seg.style.transform = `rotate(${i * angleStep}deg)`;
+    seg.innerHTML = `<div style="transform:rotate(-${i*angleStep}deg)">${text}</div>`;
+    wheel.appendChild(seg);
+  }
+}
+function spin() {
+  if (isSpinning || player.balance < player.betAmount) return;
+  isSpinning = true;
+  spinBtn.disabled = true;
+  statusEl.textContent = "… dreht …";
+  playSpinSound();
+  // 5–10 volle Umdrehungen + Zufallswinkel
+  const fullSpins = 5 + Math.floor(Math.random() * 6);
+  const extraDeg = Math.random() * 360;
+  const totalDeg = fullSpins * 360 + extraDeg;
+  wheel.style.transition = "transform 5.2s cubic-bezier(0.25, 0.1, 0.25, 1)";
+  wheel.style.transform = `rotate(${totalDeg}deg)`;
+  setTimeout(() => {
+    const finalAngle = totalDeg % 360;
+    const segIndex = Math.floor((360 - finalAngle + 22.5) / (360/37)) % 37; // Genaueres Landing (Pointer oben)
+    let resultNum, resultColor;
+    if (segIndex === 0) {
+      resultNum = 0;
+      resultColor = "green";
+    } else {
+      resultNum = segIndex;
+      resultColor = (segIndex % 2 === 1) ? "black" : "white";
+    }
+    // Realistische Auszahlung: Even-Money x2 für Farbe
+    const bet = player.betAmount;
+    let winAmount = 0;
+    let isWin = false;
+    if (resultColor === player.betColor) {
+      winAmount = bet * 2; // Brutto-Gewinn
+      isWin = true;
+      playWinSound();
+    } else {
+      playLoseSound();
+    }
+    const netChange = winAmount - bet;
+    player.balance += netChange;
+    if (player.balance < 0) player.balance = 0;
+    // Overlay für große Anzeige
+    resultOverlay.style.display = "flex";
+    resultOverlay.style.background = resultColor === "black" ? "#111" : resultColor === "white" ? "#eee" : "#00aa44";
+    resultOverlay.style.color = resultColor === "black" ? "white" : resultColor === "white" ? "#111" : "white";
+    resultOverlay.textContent = resultNum;
+    let msg = `Gelandet auf <b>${resultNum}</b> (${resultColor.toUpperCase()}) → `;
+    if (isWin) {
+      msg += `Gewinn <span style="color:#00ff99">+${netChange}$</span>`;
+    } else {
+      msg += `<span style="color:#ff3366">Verloren (-${bet}$)</span>`;
+    }
+    statusEl.innerHTML = msg;
+    saveGame();
+    updateUI();
+    // Reset
+    setTimeout(() => {
+      resultOverlay.style.display = "none";
+      wheel.style.transition = "none";
+      wheel.style.transform = `rotate(${finalAngle}deg)`;
+      setTimeout(() => {
+        wheel.style.transition = "";
+        isSpinning = false;
+        spinBtn.disabled = false;
+      }, 80);
+    }, 2000);
+  }, 5300);
+}
+// ────────────────────────────────────────────────
+loadGame();
+if (player.name) {
+  startGame();
+} else {
+  nameInput.focus();
+}
+</script>
+</body>
+</html>
