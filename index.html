@@ -293,18 +293,7 @@
                <span>🎨 Neue Farbe: Rot - $50</span>
                <button onclick="buyColor('#ff0000')">Kaufen</button>
            </div>
-           <div class="shop-item">
-               <span>🔴 Hintergrund: Neon Red - $200</span>
-               <button onclick="buyBackground('LuckyMashine/img/bg_red.jpeg')">Kaufen</button>
-           </div>
-            <div class="shop-item">
-               <span>🟣 Hintergrund: Neon Purple - $200</span>
-               <button onclick="buyBackground('LuckyMashine/img/bg_pink.ai')">Kaufen</button>
-           </div>
-           <div class="shop-item">
-               <span>🔵 Hintergrund: Neon Blue - $200</span>
-               <button onclick="buyBackground('LuckyMashine/img/bg_blue.jpeg')">Kaufen</button>
-           </div>
+        
            <div id="shop-message" style="margin-top:15px; min-height:40px; font-size:1.1rem;"></div>
        </div>
 
@@ -398,7 +387,7 @@
 
     let money = parseInt(localStorage.getItem('neonSlotsMoney')) || 100;
     let playerLevel = parseInt(localStorage.getItem('neonSlotsLevel')) || 1;
-    let unlockedColors = JSON.parse(localStorage.getItem('neonSlotsColors')) || ['#00ffff', '#ff00ff', '#33ff33'];
+    let unlockedColors = JSON.parse(localStorage.getItem('neonSlotsColors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
     let unlockedBackgrounds = JSON.parse(localStorage.getItem('neonSlotsBackgrounds')) || ['#050505'];
     let currentWin = 0;
     let isSpinning = false;
@@ -414,7 +403,7 @@
         money = 100;
         playerLevel = 1;
         unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = ['#050505'];
+        unlockedBackgrounds = ['#050505', '#FF00B7'];
         currentWin = 0;
         isSpinning = false;
         xp = 0;
@@ -652,7 +641,7 @@
         ];
 
         // Wahrscheinlichkeiten: Basis + Level-Bonus (pro Level +1% Chance auf bessere Symbole)
-        const luckBoost = playerLevel * 0.01; // +1% pro Level
+        const luckBoost = playerLevel * 0.10; // +10% pro Level
         const finalRes = [];
         let forcedSymbol = getRandomSymbol(luckBoost);
 
