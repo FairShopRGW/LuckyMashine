@@ -25,7 +25,6 @@
             overflow: hidden;
         }
 
-        /* JACKPOT BANNER */
         .jackpot-banner {
             position: absolute;
             top: 20px;
@@ -41,7 +40,6 @@
 
         .jackpot-amount { font-size: 2rem; color: var(--jackpot-color); text-shadow: 0 0 10px var(--jackpot-color); }
 
-        /* CONTAINER */
         .casino-container {
             background: #111;
             padding: 40px;
@@ -57,7 +55,6 @@
             margin-top: 60px;
         }
 
-        /* SLOTS */
         .slot-row { display: flex; align-items: center; gap: 30px; margin: 20px 0; }
         .slot-machine { display: flex; gap: 10px; }
 
@@ -71,14 +68,12 @@
         .spinning { animation: blur 0.1s infinite; }
         @keyframes blur { 0% { filter: blur(0); } 50% { filter: blur(4px); } 100% { filter: blur(0); } }
 
-        /* HEBEL */
         .lever-container { width: 40px; height: 150px; position: relative; cursor: pointer; display: none; }
         .lever-base { width: 15px; height: 100px; background: #333; margin: 0 auto; border-radius: 5px; position: relative; }
         .lever-arm { width: 10px; height: 80px; background: #666; position: absolute; top: 0; left: 2.5px; transform-origin: bottom center; transition: 0.3s; }
         .lever-ball { width: 30px; height: 30px; background: var(--neon-color); border-radius: 50%; position: absolute; top: -15px; left: -10px; box-shadow: 0 0 15px var(--neon-color); }
         .lever-pull .lever-arm { transform: rotateX(160deg); }
 
-        /* UI ELEMENTS */
         button {
             background: transparent; color: var(--neon-color);
             border: 2px solid var(--neon-color); padding: 12px 25px;
@@ -152,6 +147,11 @@
                     <div onclick="changeColor('#ff00ff')" style="width:25px; height:25px; background:#ff00ff; border-radius:50%; cursor:pointer;"></div>
                     <div onclick="changeColor('#33ff33')" style="width:25px; height:25px; background:#33ff33; border-radius:50%; cursor:pointer;"></div>
                 </div>
+
+                <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
+                <button onclick="resetAccount()" style="width:100%; border-color:#ff3333; color:#ff3333;">
+                    Account zurücksetzen
+                </button>
             </div>
 
             <div id="sound" class="tab-content">
@@ -218,7 +218,6 @@
     </div>
 
     <script>
-        // SOUND CONFIG
         const SOUNDS = {
             normal: {
                 bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
@@ -244,7 +243,24 @@
         let jackpot = 0;
         let jackpotTime = 600;
 
-        // --- JACKPOT SYSTEM ---
+        function resetAccount() {
+            if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
+
+            money = 100;
+            currentWin = 0;
+            isSpinning = false;
+
+            document.getElementById('reel1').innerText = '💎';
+            document.getElementById('reel2').innerText = '💎';
+            document.getElementById('reel3').innerText = '💎';
+
+            document.getElementById('main-controls').classList.remove('hidden');
+            document.getElementById('risk-controls').style.display = 'none';
+
+            updateUI();
+            alert("Account wurde zurückgesetzt!");
+        }
+
         function updateJackpotValue() {
             jackpot = Math.floor(Math.random() * (1000000 - 10000 + 1)) + 10000;
             document.getElementById('jackpot-val').innerText = jackpot.toLocaleString();
@@ -260,7 +276,6 @@
             }, 1000);
         }
 
-        // --- AUDIO ---
         function applySoundProfile() {
             const p = SOUNDS[document.getElementById('sound-profile').value];
             document.getElementById('bg-music').src = p.bg;
@@ -279,7 +294,6 @@
 
         function play(id) { if(soundEnabled) { const s=document.getElementById(id); s.currentTime=0; s.play().catch(()=>{}); } }
 
-        // --- ADMIN ---
         function loginAdmin() {
             if(document.getElementById('admin-password').value === "admin123") {
                 document.getElementById('admin-login-area').classList.add('hidden');
@@ -300,7 +314,6 @@
             if(!isNaN(val)) { money = val; updateUI(); }
         }
 
-        // --- GAME CORE ---
         function initGame() {
             document.getElementById('player-name').innerText = document.getElementById('username').value || "User";
             document.getElementById('start-overlay').classList.add('hidden');
@@ -327,7 +340,6 @@
             const finalRes = [];
             let forcedSymbol = symbols[Math.floor(Math.random() * symbols.length)];
 
-            // Sequenzielles Stoppen
             for (let i = 0; i < 3; i++) {
                 await new Promise(r => setTimeout(r, 800 + i * 500));
                 let res;
@@ -382,7 +394,6 @@
             updateUI();
         }
 
-        // --- UTILS ---
         function updateUI() { document.getElementById('money').innerText = money; document.getElementById('win-sum').innerText = currentWin; }
         function toggleMenu() { document.getElementById('menu-overlay').classList.toggle('hidden'); }
         function switchTab(id) {
