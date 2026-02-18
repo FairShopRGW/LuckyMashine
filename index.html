@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
@@ -45,17 +45,17 @@
 
         .casino-container {
             background: #111;
-            padding: 40px;
+            padding: 80px 40px 40px 40px;           /* mehr Platz oben */
             border: 2px solid var(--neon-color);
             border-radius: 20px;
             box-shadow: 0 0 20px var(--neon-color);
             text-align: center;
-            width: 500px;
+            width: 520px;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 60px;
+            margin-top: 70px;
         }
 
         .slot-row { display: flex; align-items: center; gap: 30px; margin: 20px 0; }
@@ -90,7 +90,15 @@
         .menu-card { background: #1a1a1a; padding: 30px; border: 1px solid var(--neon-color); border-radius: 10px; text-align: left; min-width: 320px; max-height: 80vh; overflow-y: auto; }
 
         .hidden { display: none !important; }
-        .stats { width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2rem; }
+        .stats {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin: 50px 0 30px 0;                  /* deutlich mehr Abstand nach oben */
+            font-size: 1.3rem;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
 
         .menu-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; }
         .menu-tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: #888; padding: 10px; cursor: pointer; font-size: 0.7rem; }
@@ -99,7 +107,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .admin-section input {
+        .admin-section input, .promo-section input {
             background: transparent; border: 1px solid var(--neon-color); color: white;
             padding: 10px; width: 100%; margin: 10px 0; font-family: 'Orbitron';
         }
@@ -109,6 +117,47 @@
         .risk-area { display: none; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; width: 100%; }
         .cheat-btn { border-color: #ff8800; color: #ff8800; font-size: 0.7rem; width: 100%; }
         .cheat-active { background: #ff8800 !important; color: #000 !important; }
+
+        .promo-success {
+            color: #33ff33;
+            text-shadow: 0 0 10px #33ff33;
+            animation: pulse 1.5s infinite;
+        }
+        .promo-error {
+            color: #ff4444;
+            text-shadow: 0 0 8px #ff4444;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Verbessertes Styling für den Einstellungs-Button */
+        button[onclick="toggleMenu()"] {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.12);
+            color: var(--neon-color);
+            font-size: 1.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 5;
+        }
+
+        button[onclick="toggleMenu()"]:hover {
+            background: var(--neon-color);
+            color: #000;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--neon-color);
+        }
     </style>
 </head>
 
@@ -119,7 +168,8 @@
 <audio id="win-sound"></audio>
 <audio id="jackpot-sound"></audio>
 <audio id="button-sound"></audio>
-<audio id="lose-sound"></audio> <!-- NEU: für Meme-Verlust-Sound -->
+<audio id="lose-sound"></audio>
+<audio id="promo-success-sound"></audio>
 
 <div id="jackpot-display" class="jackpot-banner">
    <div style="font-size: 0.7rem;">JACKPOT-RESET IN: <span id="timer">10:00</span></div>
@@ -139,6 +189,7 @@
        <div class="menu-tabs">
            <button class="menu-tab-btn active" onclick="switchTab('einstellungen')">Spiel</button>
            <button class="menu-tab-btn" onclick="switchTab('sound')">Audio</button>
+           <button class="menu-tab-btn" onclick="switchTab('promo')">Promo Vault</button>
            <button class="menu-tab-btn" onclick="switchTab('admin')">Admin</button>
        </div>
 
@@ -169,6 +220,18 @@
            <label><input type="checkbox" id="sound-toggle" checked onchange="toggleSound()"> Sounds an/aus</label>
        </div>
 
+       <div id="promo" class="tab-content promo-section">
+           <h3 style="color: var(--jackpot-color);">PROMO VAULT</h3>
+           <p style="font-size:0.9rem; color:#aaa; margin-bottom:15px;">
+               Gib einen Promo-Code ein und sichere dir Credits.
+           </p>
+           <input type="text" id="promo-code" placeholder="Code hier eingeben" style="text-transform:uppercase;">
+           <button onclick="redeemPromoCode()" style="width:100%; margin-top:12px; border-color:#ffcc00; color:#ffcc00;">
+               EINLÖSEN
+           </button>
+           <div id="promo-message" style="margin-top:15px; min-height:40px; font-size:1.1rem;"></div>
+       </div>
+
        <div id="admin" class="tab-content admin-section">
            <div id="admin-login-area">
                <input type="password" id="admin-password" placeholder="Passwort">
@@ -192,14 +255,17 @@
 </div>
 
 <div class="casino-container">
-   <button onclick="toggleMenu()" style="position:absolute; top:10px; right:10px; border:none; font-size:1.5rem;">⚙️</button>
+   <button onclick="toggleMenu()" title="Einstellungen">⚙️</button>
+
    <div class="stats">
        <div><span id="player-name" style="color: var(--neon-color);">Spieler</span></div>
-       <div style="color: #33ff33;">$<span id="money">100</span></div>
+       <div style="color: #33ff33; font-weight: bold;">$<span id="money">100</span></div>
    </div>
-   <div style="margin-bottom: 20px;">
-       EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 80px; background: #000; color: #fff; border: 1px solid var(--neon-color); font-family: 'Orbitron'; text-align: center;">
+
+   <div style="margin-bottom: 25px; font-size: 1.1rem;">
+       EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 90px; background: #000; color: #fff; border: 1px solid var(--neon-color); font-family: 'Orbitron'; text-align: center; padding: 6px;">
    </div>
+
    <div class="slot-row">
        <div class="slot-machine">
            <div class="reel" id="reel1">💎</div>
@@ -210,9 +276,11 @@
            <div class="lever-base"><div class="lever-arm"><div class="lever-ball"></div></div></div>
        </div>
    </div>
+
    <div id="main-controls" style="width: 100%;">
        <button id="spin-btn" onclick="spin()" style="width: 100%; height: 60px;">SPIN</button>
    </div>
+
    <div id="risk-controls" class="risk-area">
        <div>GEWINN: <span id="win-sum" style="color: #33ff33;">0</span>€</div>
        <div style="display:flex; gap:10px; margin-top:10px;">
@@ -241,6 +309,14 @@
         }
     };
 
+    const PROMO_CODES = {
+        "NEON2025":      { amount: 250,   desc: "Willkommens-Boost" },
+        "JACKPOTKING":   { amount: 1000,  desc: "Highroller-Geschenk" },
+        "MEMELORD":      { amount: 420,   desc: "Meme Power" },
+        "DEBUG1337":     { amount: 1337,  desc: "Entwickler-Segen" },
+        "FREESPINS69":   { amount: 69,    desc: "Nice." }
+    };
+
     let money = 100;
     let currentWin = 0;
     let isSpinning = false;
@@ -251,18 +327,14 @@
 
     function resetAccount() {
         if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
-
         money = 100;
         currentWin = 0;
         isSpinning = false;
-
         document.getElementById('reel1').innerText = '💎';
         document.getElementById('reel2').innerText = '💎';
         document.getElementById('reel3').innerText = '💎';
-
         document.getElementById('main-controls').classList.remove('hidden');
         document.getElementById('risk-controls').style.display = 'none';
-
         updateUI();
         alert("Account wurde zurückgesetzt!");
     }
@@ -285,18 +357,14 @@
     function applySoundProfile() {
         const profile = document.getElementById('sound-profile').value;
         const p = SOUNDS[profile];
-
         document.getElementById('bg-music').src = p.bg;
         document.getElementById('spin-sound').src = p.spin;
         document.getElementById('win-sound').src = p.win;
         document.getElementById('jackpot-sound').src = p.jackpot;
         document.getElementById('button-sound').src = p.btn;
-
-        // Lose-Sound nur im Meme-Modus laden
         if (profile === 'meme' && p.lose) {
             document.getElementById('lose-sound').src = p.lose;
         }
-
         if(soundEnabled) document.getElementById('bg-music').play().catch(()=>{});
     }
 
@@ -318,6 +386,41 @@
         if (!soundEnabled) return;
         if (document.getElementById('sound-profile').value === 'meme') {
             play('lose-sound');
+        }
+    }
+
+    function redeemPromoCode() {
+        const codeInput = document.getElementById('promo-code');
+        const msg = document.getElementById('promo-message');
+        const code = codeInput.value.trim().toUpperCase();
+
+        if (!code) {
+            msg.innerHTML = '<span class="promo-error">Code fehlt!</span>';
+            return;
+        }
+
+        const usedCodes = JSON.parse(localStorage.getItem('neonSlotsUsedPromos') || '[]');
+
+        if (usedCodes.includes(code)) {
+            msg.innerHTML = '<span class="promo-error">Dieser Code wurde bereits eingelöst.</span>';
+            codeInput.value = '';
+            return;
+        }
+
+        if (PROMO_CODES[code]) {
+            const reward = PROMO_CODES[code].amount;
+            money += reward;
+            usedCodes.push(code);
+            localStorage.setItem('neonSlotsUsedPromos', JSON.stringify(usedCodes));
+            msg.innerHTML = `<span class="promo-success">+ $${reward} – ${PROMO_CODES[code].desc}!</span>`;
+            play('win-sound');
+            updateUI();
+            msg.style.animation = 'pulse 1.2s';
+            setTimeout(() => { msg.style.animation = ''; }, 1500);
+            codeInput.value = '';
+        } else {
+            msg.innerHTML = '<span class="promo-error">Ungültiger Code.</span>';
+            codeInput.value = '';
         }
     }
 
@@ -398,7 +501,6 @@
             play('win-sound');
             startRisk();
         } else {
-            // Totalverlust → Meme-Sound im Meme-Modus
             playLoseIfMeme();
             endGame();
         }
