@@ -1,120 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Slots - Ultimate Casino Edition</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Slots - Ultimate Casino Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-<style>
-body{
-    background:#050505;
-    color:white;
-    font-family:Orbitron, sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-.casino-container{
-    background:#111;
-    padding:30px;
-    border:2px solid cyan;
-    border-radius:15px;
-    text-align:center;
-    width:420px;
-}
-.reel{
-    width:90px;
-    height:100px;
-    border:2px solid cyan;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:2.5rem;
-    margin:10px;
-}
-button{
-    margin-top:10px;
-    padding:12px 20px;
-    border:2px solid cyan;
-    background:transparent;
-    color:cyan;
-    cursor:pointer;
-}
-input{
-    padding:10px;
-    background:black;
-    color:white;
-    border:1px solid cyan;
-}
-.overlay{
-    position:fixed;
-    inset:0;
-    background:black;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-}
-.hidden{display:none;}
-</style>
+        :root {
+            --neon-color: #00ffff;
+            --bg-color: #050505;
+            --jackpot-color: #ffcc00;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .jackpot-banner {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            background: rgba(255, 204, 0, 0.1);
+            padding: 10px 0;
+            border-top: 2px solid var(--jackpot-color);
+            border-bottom: 2px solid var(--jackpot-color);
+            box-shadow: 0 0 15px var(--jackpot-color);
+            z-index: 10;
+        }
+
+        .jackpot-amount { font-size: 2rem; color: var(--jackpot-color); text-shadow: 0 0 10px var(--jackpot-color); }
+
+        .casino-container {
+            background: #111;
+            padding: 40px;
+            border: 2px solid var(--neon-color);
+            border-radius: 20px;
+            box-shadow: 0 0 20px var(--neon-color);
+            text-align: center;
+            width: 500px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 60px;
+        }
+
+        .slot-row { display: flex; align-items: center; gap: 30px; margin: 20px 0; }
+        .slot-machine { display: flex; gap: 10px; }
+
+        .reel {
+            width: 100px; height: 120px;
+            background: #000; border: 2px solid var(--neon-color);
+            border-radius: 10px; font-size: 3rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        button {
+            background: transparent; color: var(--neon-color);
+            border: 2px solid var(--neon-color); padding: 12px 25px;
+            font-family: 'Orbitron'; cursor: pointer; text-transform: uppercase;
+            font-weight: bold; transition: 0.3s; margin: 5px 0;
+        }
+
+        button:hover:not(:disabled) { background: var(--neon-color); color: #000; box-shadow: 0 0 20px var(--neon-color); }
+        
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .menu-card { background: #1a1a1a; padding: 30px; border: 1px solid var(--neon-color); border-radius: 10px; text-align: left; min-width: 320px; max-height: 80vh; overflow-y: auto; }
+
+        .hidden { display: none !important; }
+        .stats { width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2rem; }
+    </style>
 </head>
 <body>
 
-<div id="start-overlay" class="overlay">
-    <h1>NEON SLOTS</h1>
-    <input type="text" id="username" placeholder="Dein Name">
-    <button onclick="initGame()">Enter Casino</button>
-</div>
-
-<div class="casino-container">
-    <h2 id="player-name">Spieler</h2>
-    <h3>$<span id="money">100</span></h3>
-
-    <div>
-        <div class="reel" id="reel1">💎</div>
-        <div class="reel" id="reel2">💎</div>
-        <div class="reel" id="reel3">💎</div>
+    <div id="start-overlay" class="overlay">
+        <h1 style="color: var(--neon-color);">NEON SLOTS</h1>
+        <input type="text" id="username" placeholder="Dein Name" style="padding:15px; margin-bottom:15px; background:transparent; border:1px solid var(--neon-color); color:white; font-family:'Orbitron'; text-align:center;">
+        <button onclick="initGame()">Enter Casino</button>
     </div>
 
-    <br>
-    Einsatz: <input type="number" id="bet" value="10" min="1">
+    <div class="casino-container">
+        <div class="stats">
+            <div><span id="player-name" style="color: var(--neon-color);">Spieler</span></div>
+            <div style="color: #33ff33;">$<span id="money">100</span></div>
+        </div>
 
-    <br>
-    <button onclick="spin()">SPIN</button>
+        <div class="slot-row">
+            <div class="slot-machine">
+                <div class="reel" id="reel1">💎</div>
+                <div class="reel" id="reel2">💎</div>
+                <div class="reel" id="reel3">💎</div>
+            </div>
+        </div>
 
-    <hr>
+        <div style="margin-bottom: 20px;">
+            EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 80px; background: #000; color: #fff; border: 1px solid var(--neon-color); font-family: 'Orbitron'; text-align: center;">
+        </div>
 
-    <h3>Redeem Code</h3>
-    <input id="redeem-input" placeholder="Code eingeben">
-    <button onclick="redeemCode()">Einlösen</button>
+        <button onclick="spin()" style="width: 100%; height: 60px;">SPIN</button>
 
-    <hr>
+        <hr style="width:100%; margin:20px 0;">
 
-    <button onclick="resetAccount()" style="border-color:red;color:red;">Account Reset</button>
-</div>
+        <input type="text" id="redeem-input" placeholder="Redeem Code" style="width:100%; background:#000; color:#fff; border:1px solid var(--neon-color); padding:10px; font-family:'Orbitron';">
+        <button onclick="redeemCode()" style="width:100%;">Code einlösen</button>
+
+        <button onclick="resetAccount()" style="width:100%; border-color:#ff3333; color:#ff3333;">
+            Account zurücksetzen
+        </button>
+    </div>
 
 <script>
-/* ============================
-   REDEEM CODES (HIER EDITIEREN)
-   ============================ */
+/* =========================
+   EDITIERBARE REDEEM CODES
+   ========================= */
 const REDEEM_CODES = {
-    "START100": { amount: 100, name: "Starter Bonus" },
-    "VIP500": { amount: 500, name: "VIP Bonus" },
-    "ULTRA1000": { amount: 1000, name: "Ultra Jackpot" }
+    "FREE100": 100,
+    "MEGA500": 500,
+    "JACKPOT1000": 1000
 };
 
-/* ============================
-   LOKALE SPEICHER DATEN LADEN
-   ============================ */
+/* =========================
+   LOKALE DATEN LADEN
+   ========================= */
 let playerName = localStorage.getItem("playerName") || "";
 let money = parseInt(localStorage.getItem("money")) || 100;
 let usedCodes = JSON.parse(localStorage.getItem("usedCodes") || "[]");
 
-/* ============================
-   INIT GAME
-   ============================ */
+/* Auto Login wenn gespeichert */
+window.onload = () => {
+    if(playerName){
+        document.getElementById("start-overlay").classList.add("hidden");
+        document.getElementById("player-name").innerText = playerName;
+    }
+    updateUI();
+};
+
+/* =========================
+   SPIEL START
+   ========================= */
 function initGame(){
     const nameInput = document.getElementById("username").value.trim();
     if(nameInput){
@@ -123,33 +156,23 @@ function initGame(){
     }
     document.getElementById("player-name").innerText = playerName || "Spieler";
     document.getElementById("start-overlay").classList.add("hidden");
-    updateUI();
 }
 
-/* Auto login wenn Name gespeichert */
-if(playerName){
-    document.getElementById("start-overlay").classList.add("hidden");
-    document.getElementById("player-name").innerText = playerName;
-}
-
-/* ============================
-   UI UPDATE + LOCAL SAVE
-   ============================ */
+/* =========================
+   UI + STORAGE UPDATE
+   ========================= */
 function updateUI(){
-    document.getElementById("money").innerText = money;
+    document.getElementById('money').innerText = money;
     localStorage.setItem("money", money);
     localStorage.setItem("usedCodes", JSON.stringify(usedCodes));
 }
 
-/* ============================
-   SLOT SPIN
-   ============================ */
+/* =========================
+   SPIN LOGIK (EINFACH)
+   ========================= */
 function spin(){
-    let bet = parseInt(document.getElementById("bet").value);
-    if(bet > money){
-        alert("Nicht genug Geld!");
-        return;
-    }
+    const bet = parseInt(document.getElementById("bet-amount").value);
+    if(bet > money){ alert("Nicht genug Geld!"); return; }
 
     money -= bet;
 
@@ -163,7 +186,7 @@ function spin(){
     document.getElementById("reel3").innerText = r3;
 
     if(r1===r2 && r2===r3){
-        let win = bet * 5;
+        const win = bet * 5;
         money += win;
         alert("GEWINN! +" + win + "$");
     }
@@ -171,9 +194,9 @@ function spin(){
     updateUI();
 }
 
-/* ============================
-   REDEEM CODE SYSTEM
-   ============================ */
+/* =========================
+   REDEEM SYSTEM (LOCAL)
+   ========================= */
 function redeemCode(){
     const code = document.getElementById("redeem-input").value.trim().toUpperCase();
     if(!code) return;
@@ -184,35 +207,36 @@ function redeemCode(){
     }
 
     if(REDEEM_CODES[code]){
-        const reward = REDEEM_CODES[code].amount;
-        money += reward;
+        money += REDEEM_CODES[code];
         usedCodes.push(code);
         updateUI();
-        alert("Code '" + REDEEM_CODES[code].name + "' eingelöst! +" + reward + "$");
-    }else{
+        alert("Code eingelöst! +" + REDEEM_CODES[code] + "$");
+    } else {
         alert("Ungültiger Code!");
     }
 
     document.getElementById("redeem-input").value = "";
 }
 
-/* ============================
-   ACCOUNT RESET
-   ============================ */
+/* =========================
+   ACCOUNT RESET (LOCAL)
+   ========================= */
 function resetAccount(){
-    if(!confirm("Willst du wirklich alles löschen?")) return;
+    if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
 
     localStorage.clear();
     playerName = "";
     money = 100;
     usedCodes = [];
 
-    document.getElementById("reel1").innerText="💎";
-    document.getElementById("reel2").innerText="💎";
-    document.getElementById("reel3").innerText="💎";
+    document.getElementById('reel1').innerText = '💎';
+    document.getElementById('reel2').innerText = '💎';
+    document.getElementById('reel3').innerText = '💎';
 
     document.getElementById("start-overlay").classList.remove("hidden");
-    document.getElementById("username").value="";
+    document.getElementById("username").value = "";
+    document.getElementById("player-name").innerText = "Spieler";
+
     updateUI();
 }
 </script>
