@@ -174,6 +174,33 @@
             transform: scale(1.1);
             box-shadow: 0 0 15px var(--neon-color);
         }
+
+        /* Neue Styles für XP-System */
+        #level-bar {
+            width: 100%;
+            background: #333;
+            height: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        #level-progress {
+            width: 0%;
+            background: var(--neon-color);
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .xp-gain {
+            position: absolute;
+            color: #ffff00;
+            font-size: 1rem;
+            animation: flyToBar 1s ease-out forwards;
+            text-shadow: 0 0 5px #ffff00;
+        }
+        @keyframes flyToBar {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(0.5); }
+        }
     </style>
 </head>
 
@@ -255,23 +282,23 @@
                Kaufe Upgrades für bessere Chancen und Styles!
            </p>
            <div class="shop-item">
-               <span>Level Up (Glück +1% pro Level) - $100</span>
+               <span>📈 Level Up (Glück +1% pro Level) - $100</span>
                <button onclick="buyLevel()">Kaufen</button>
            </div>
            <div class="shop-item">
-               <span>Neue Farbe: Blau - $50</span>
+               <span>🎨 Neue Farbe: Blau - $50</span>
                <button onclick="buyColor('#0000ff')">Kaufen</button>
            </div>
            <div class="shop-item">
-               <span>Neue Farbe: Rot - $50</span>
+               <span>🎨 Neue Farbe: Rot - $50</span>
                <button onclick="buyColor('#ff0000')">Kaufen</button>
            </div>
            <div class="shop-item">
-               <span>Hintergrund: Sterne - $200</span>
+               <span>🌌 Hintergrund: Sterne - $200</span>
                <button onclick="buyBackground('url(https://example.com/stars.jpg)')">Kaufen</button>
            </div>
            <div class="shop-item">
-               <span>Hintergrund: Neon City - $200</span>
+               <span>🏙️ Hintergrund: Neon City - $200</span>
                <button onclick="buyBackground('url(https://example.com/neon-city.jpg)')">Kaufen</button>
            </div>
            <div id="shop-message" style="margin-top:15px; min-height:40px; font-size:1.1rem;"></div>
@@ -306,6 +333,8 @@
        <div><span id="player-name" style="color: var(--neon-color);">Spieler</span> (Level: <span id="player-level">1</span>)</div>
        <div style="color: #33ff33; font-weight: bold;">$<span id="money">100</span></div>
    </div>
+
+   <div id="level-bar"><div id="level-progress"></div></div>
 
    <div style="margin-bottom: 25px; font-size: 1.1rem;">
        EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 90px; background: #000; color: #fff; border: 1px solid var(--neon-color); font-family: 'Orbitron'; text-align: center; padding: 6px;">
@@ -354,6 +383,7 @@
         }
     };
 
+    // Hier Gutschein-Codes ändern: Füge neue Codes hinzu oder bearbeite bestehende.
     const PROMO_CODES = {
         "NEON2025":      { amount: 250,   desc: "Willkommens-Boost" },
         "JACKPOTKING":   { amount: 1000,  desc: "Highroller-Geschenk" },
@@ -372,6 +402,8 @@
     let adminMode = 'normal';
     let jackpot = 0;
     let jackpotTime = 600;
+    let xp = parseInt(localStorage.getItem('neonSlotsXp')) || 0;
+    let maxXp = parseInt(localStorage.getItem('neonSlotsMaxXp')) || 100;
 
     function resetAccount() {
         if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
@@ -381,6 +413,8 @@
         unlockedBackgrounds = ['#050505'];
         currentWin = 0;
         isSpinning = false;
+        xp = 0;
+        maxXp = 100;
         document.getElementById('reel1').innerText = '💎';
         document.getElementById('reel2').innerText = '💎';
         document.getElementById('reel3').innerText = '💎';
@@ -396,6 +430,8 @@
         localStorage.setItem('neonSlotsLevel', playerLevel);
         localStorage.setItem('neonSlotsColors', JSON.stringify(unlockedColors));
         localStorage.setItem('neonSlotsBackgrounds', JSON.stringify(unlockedBackgrounds));
+        localStorage.setItem('neonSlotsXp', xp);
+        localStorage.setItem('neonSlotsMaxXp', maxXp);
     }
 
     function updateJackpotValue() {
@@ -628,6 +664,9 @@
             finalRes.push(res);
         }
 
+        // XP hinzufügen nach jedem Spin
+        addXp(10); // 10 XP pro Spin
+
         checkResults(finalRes, bet);
     }
 
@@ -705,6 +744,7 @@
         document.getElementById('money').innerText = money;
         document.getElementById('win-sum').innerText = currentWin;
         document.getElementById('player-level').innerText = playerLevel;
+        document.getElementById('level-progress').style.width = (xp / maxXp * 100) + '%';
     }
 
     function toggleMenu() {
@@ -736,6 +776,38 @@
             document.getElementById('lever-box').classList.remove('lever-pull');
             spin();
         }, 300);
+    }
+
+    function addXp(amount) {
+        xp += amount;
+        showXpGain(amount);
+        if (xp >= maxXp) {
+            xp -= maxXp;
+            playerLevel++;
+            maxXp += 50; // Erhöhe Max-XP pro Level
+            alert(`Level Up! Jetzt Level ${playerLevel}`);
+        }
+        saveProgress();
+        updateUI();
+    }
+
+    function showXpGain(amount) {
+        const xpGain = document.createElement('div');
+        xpGain.classList.add('xp-gain');
+        xpGain.innerText = `+${amount} XP`;
+        // Positioniere über dem Slot-Machine
+        const slotRow = document.querySelector('.slot-row');
+        xpGain.style.left = `${slotRow.offsetLeft + slotRow.offsetWidth / 2}px`;
+        xpGain.style.top = `${slotRow.offsetTop + slotRow.offsetHeight}px`;
+        document.body.appendChild(xpGain);
+        // Ziel: Fliege zur Level-Bar
+        setTimeout(() => {
+            const levelBar = document.getElementById('level-bar');
+            const barRect = levelBar.getBoundingClientRect();
+            xpGain.style.transform = `translate(${barRect.left + barRect.width / 2 - slotRow.offsetLeft - slotRow.offsetWidth / 2}px, ${barRect.top - slotRow.offsetTop - slotRow.offsetHeight}px) scale(0.5)`;
+            xpGain.style.opacity = 0;
+        }, 10);
+        setTimeout(() => xpGain.remove(), 1000);
     }
 </script>
 
