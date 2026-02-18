@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Slots - Ultimate Casino Edition</title>
+    <title>Neon Slots - Secure Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
@@ -57,7 +57,6 @@
             margin-top: 60px;
         }
 
-        /* SLOTS */
         .slot-row { display: flex; align-items: center; gap: 30px; margin: 20px 0; }
         .slot-machine { display: flex; gap: 10px; }
 
@@ -71,13 +70,6 @@
         .spinning { animation: blur 0.1s infinite; }
         @keyframes blur { 0% { filter: blur(0); } 50% { filter: blur(4px); } 100% { filter: blur(0); } }
 
-        /* HEBEL */
-        .lever-container { width: 40px; height: 150px; position: relative; cursor: pointer; display: none; }
-        .lever-base { width: 15px; height: 100px; background: #333; margin: 0 auto; border-radius: 5px; position: relative; }
-        .lever-arm { width: 10px; height: 80px; background: #666; position: absolute; top: 0; left: 2.5px; transform-origin: bottom center; transition: 0.3s; }
-        .lever-ball { width: 30px; height: 30px; background: var(--neon-color); border-radius: 50%; position: absolute; top: -15px; left: -10px; box-shadow: 0 0 15px var(--neon-color); }
-        .lever-pull .lever-arm { transform: rotateX(160deg); }
-
         /* UI ELEMENTS */
         button {
             background: transparent; color: var(--neon-color);
@@ -89,28 +81,27 @@
         button:hover:not(:disabled) { background: var(--neon-color); color: #000; box-shadow: 0 0 20px var(--neon-color); }
         
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        .menu-card { background: #1a1a1a; padding: 30px; border: 1px solid var(--neon-color); border-radius: 10px; text-align: left; min-width: 320px; max-height: 80vh; overflow-y: auto; }
+        .menu-card { background: #1a1a1a; padding: 30px; border: 1px solid var(--neon-color); border-radius: 10px; text-align: left; min-width: 340px; max-height: 80vh; overflow-y: auto; }
 
         .hidden { display: none !important; }
         .stats { width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2rem; }
         
         .menu-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; }
-        .menu-tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: #888; padding: 10px; cursor: pointer; font-size: 0.7rem; }
+        .menu-tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: #888; padding: 10px; cursor: pointer; font-size: 0.6rem; }
         .menu-tab-btn.active { border-bottom-color: var(--neon-color); color: var(--neon-color); }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .admin-section input { 
+        .input-field { 
             background: transparent; border: 1px solid var(--neon-color); color: white; 
-            padding: 10px; width: 100%; margin: 10px 0; font-family: 'Orbitron';
+            padding: 10px; width: 100%; margin: 10px 0; font-family: 'Orbitron'; box-sizing: border-box;
         }
 
         .admin-badge { background: #ff8800; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 5px; }
-
         .risk-area { display: none; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; width: 100%; }
         .cheat-btn { border-color: #ff8800; color: #ff8800; font-size: 0.7rem; width: 100%; }
         .cheat-active { background: #ff8800 !important; color: #000 !important; }
+        
+        .reset-btn { border-color: #ff4444; color: #ff4444; font-size: 0.7rem; margin-top: 20px; width: 100% !important; }
+        .reset-btn:hover { background: #ff4444 !important; color: white !important; }
     </style>
 </head>
 <body>
@@ -128,7 +119,7 @@
 
     <div id="start-overlay" class="overlay">
         <h1 style="color: var(--neon-color);">NEON SLOTS</h1>
-        <input type="text" id="username" placeholder="Dein Name" style="padding:15px; margin-bottom:15px; background:transparent; border:1px solid var(--neon-color); color:white; font-family:'Orbitron'; text-align:center;">
+        <input type="text" id="username" placeholder="Dein Name" class="input-field" style="text-align:center; width: 250px;">
         <button onclick="initGame()">Enter Casino</button>
     </div>
 
@@ -137,47 +128,47 @@
             <h2 style="color: var(--neon-color); margin-top: 0;">MENÜ <span id="admin-badge" class="admin-badge hidden">ADMIN</span></h2>
             
             <div class="menu-tabs">
-                <button class="menu-tab-btn active" onclick="switchTab('einstellungen')">Spiel</button>
-                <button class="menu-tab-btn" onclick="switchTab('sound')">Audio</button>
-                <button class="menu-tab-btn" onclick="switchTab('admin')">Admin</button>
+                <button class="menu-tab-btn active" onclick="switchTab(event, 'einstellungen')">Spiel</button>
+                <button class="menu-tab-btn" onclick="switchTab(event, 'bonus')">Bonus</button>
+                <button class="menu-tab-btn" onclick="switchTab(event, 'sound')">Audio</button>
+                <button class="menu-tab-btn" onclick="switchTab(event, 'admin')">Admin</button>
             </div>
 
             <div id="einstellungen" class="tab-content active">
-                <p>Eingabe:</p>
-                <label><input type="radio" name="input-type" value="button" checked onchange="updateInputMethod()"> Button</label>
-                <label><input type="radio" name="input-type" value="lever" onchange="updateInputMethod()"> Hebel</label>
-                <p>Farbe:</p>
-                <div style="display:flex; gap:10px;">
-                    <div onclick="changeColor('#00ffff')" style="width:25px; height:25px; background:#00ffff; border-radius:50%; cursor:pointer;"></div>
-                    <div onclick="changeColor('#ff00ff')" style="width:25px; height:25px; background:#ff00ff; border-radius:50%; cursor:pointer;"></div>
-                    <div onclick="changeColor('#33ff33')" style="width:25px; height:25px; background:#33ff33; border-radius:50%; cursor:pointer;"></div>
-                </div>
+                <p>Optionen:</p>
+                <button class="reset-btn" onclick="resetAccount()">Account Reseten ($100)</button>
+            </div>
+
+            <div id="bonus" class="tab-content">
+                <p>Redeem Code:</p>
+                <input type="text" id="redeem-input" class="input-field" placeholder="CODE">
+                <button onclick="redeemCode()" style="width:100%;">Einlösen</button>
+                <div id="code-status" style="font-size: 0.6rem; margin-top: 5px; color: #888;">Codes: START2026, GEMINI</div>
             </div>
 
             <div id="sound" class="tab-content">
-                <p>Sound-Profil:</p>
-                <select id="sound-profile" onchange="applySoundProfile()" style="width:100%; background:#000; color:var(--neon-color); border:1px solid var(--neon-color); padding:5px;">
-                    <option value="normal">Normal (Classic)</option>
+                <p>Profil:</p>
+                <select id="sound-profile" onchange="applySoundProfile()" style="width:100%; background:#000; color:var(--neon-color); border:1px solid var(--neon-color); padding:5px; font-family: 'Orbitron';">
+                    <option value="normal">Normal</option>
                     <option value="meme">Meme Edition 🤡</option>
                 </select>
                 <br><br>
-                <label><input type="checkbox" id="sound-toggle" checked onchange="toggleSound()"> Sounds an/aus</label>
+                <label><input type="checkbox" id="sound-toggle" checked onchange="toggleSound()"> Sounds an</label>
             </div>
 
             <div id="admin" class="tab-content admin-section">
                 <div id="admin-login-area">
-                    <input type="password" id="admin-password" placeholder="Passwort">
+                    <input type="password" id="admin-password" class="input-field" placeholder="Passwort">
                     <button onclick="loginAdmin()" style="width:100%;">Login</button>
                 </div>
                 <div id="admin-panel" class="hidden">
                     <p style="color:#ff8800; font-size:0.8rem;">GUTHABEN:</p>
-                    <input type="number" id="admin-money-input" placeholder="Betrag">
+                    <input type="number" id="admin-money-input" class="input-field" placeholder="Betrag">
                     <button onclick="setMoneyAdmin()" style="width:100%;">Setzen</button>
                     <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
-                    <p style="color:#ff8800; font-size:0.8rem;">GEWINN-MODUS:</p>
                     <button id="cheat-normal" class="cheat-btn cheat-active" onclick="setCheat('normal')">Zufall</button>
-                    <button id="cheat-win" class="cheat-btn" onclick="setCheat('win')">Sieg (3x)</button>
-                    <button id="cheat-jackpot" class="cheat-btn" onclick="setCheat('jackpot')">Jackpot (777)</button>
+                    <button id="cheat-win" class="cheat-btn" onclick="setCheat('win')">Sieg</button>
+                    <button id="cheat-jackpot" class="cheat-btn" onclick="setCheat('jackpot')">Jackpot</button>
                 </div>
             </div>
 
@@ -192,21 +183,15 @@
             <div><span id="player-name" style="color: var(--neon-color);">Spieler</span></div>
             <div style="color: #33ff33;">$<span id="money">100</span></div>
         </div>
-        <div style="margin-bottom: 20px;">
-            EINSATZ: <input type="number" id="bet-amount" value="10" min="1" style="width: 80px; background: #000; color: #fff; border: 1px solid var(--neon-color); font-family: 'Orbitron'; text-align: center;">
-        </div>
         <div class="slot-row">
             <div class="slot-machine">
                 <div class="reel" id="reel1">💎</div>
                 <div class="reel" id="reel2">💎</div>
                 <div class="reel" id="reel3">💎</div>
             </div>
-            <div class="lever-container" id="lever-box" onclick="pullLever()">
-                <div class="lever-base"><div class="lever-arm"><div class="lever-ball"></div></div></div>
-            </div>
         </div>
         <div id="main-controls" style="width: 100%;">
-            <button id="spin-btn" onclick="spin()" style="width: 100%; height: 60px;">SPIN</button>
+            <button id="spin-btn" onclick="spin()" style="width: 100%; height: 60px;">SPIN (10$)</button>
         </div>
         <div id="risk-controls" class="risk-area">
             <div>GEWINN: <span id="win-sum" style="color: #33ff33;">0</span>€</div>
@@ -218,23 +203,13 @@
     </div>
 
     <script>
-        // SOUND CONFIG
         const SOUNDS = {
-            normal: {
-                bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
-                spin: "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3",
-                win: "https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3",
-                jackpot: "https://assets.mixkit.co/active_storage/sfx/2021/2021-preview.mp3",
-                btn: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"
-            },
-            meme: {
-                bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-                spin: "https://www.myinstants.com/media/sounds/airhorn.mp3",
-                win: "https://www.myinstants.com/media/sounds/wow.mp3",
-                jackpot: "https://www.myinstants.com/media/sounds/emotional-damage-meme.mp3",
-                btn: "https://www.myinstants.com/media/sounds/discord-notification.mp3"
-            }
+            normal: { bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3", spin: "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3", win: "https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3", jackpot: "https://assets.mixkit.co/active_storage/sfx/2021/2021-preview.mp3" },
+            meme: { bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", spin: "https://www.myinstants.com/media/sounds/airhorn.mp3", win: "https://www.myinstants.com/media/sounds/wow.mp3", jackpot: "https://www.myinstants.com/media/sounds/emotional-damage-meme.mp3" }
         };
+
+        const CODES = { "START2026": 500, "GEMINI": 1000, "JACKPOT777": 7777 };
+        let usedCodes = []; // Speicher für bereits genutzte Codes
 
         let money = 100;
         let currentWin = 0;
@@ -244,79 +219,51 @@
         let jackpot = 0;
         let jackpotTime = 600;
 
-        // --- JACKPOT SYSTEM ---
-        function updateJackpotValue() {
-            jackpot = Math.floor(Math.random() * (1000000 - 10000 + 1)) + 10000;
-            document.getElementById('jackpot-val').innerText = jackpot.toLocaleString();
-        }
-
-        function startJackpotTimer() {
-            setInterval(() => {
-                jackpotTime--;
-                if (jackpotTime <= 0) { jackpotTime = 600; updateJackpotValue(); }
-                const mins = Math.floor(jackpotTime / 60);
-                const secs = jackpotTime % 60;
-                document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            }, 1000);
-        }
-
-        // --- AUDIO ---
-        function applySoundProfile() {
-            const p = SOUNDS[document.getElementById('sound-profile').value];
-            document.getElementById('bg-music').src = p.bg;
-            document.getElementById('spin-sound').src = p.spin;
-            document.getElementById('win-sound').src = p.win;
-            document.getElementById('jackpot-sound').src = p.jackpot;
-            document.getElementById('button-sound').src = p.btn;
-            if(soundEnabled) document.getElementById('bg-music').play().catch(()=>{});
-        }
-
-        function toggleSound() {
-            soundEnabled = document.getElementById('sound-toggle').checked;
-            const bg = document.getElementById('bg-music');
-            soundEnabled ? bg.play() : bg.pause();
-        }
-
-        function play(id) { if(soundEnabled) { const s=document.getElementById(id); s.currentTime=0; s.play().catch(()=>{}); } }
-
-        // --- ADMIN ---
-        function loginAdmin() {
-            if(document.getElementById('admin-password').value === "admin123") {
-                document.getElementById('admin-login-area').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('admin-badge').classList.remove('hidden');
-                changeColor('#ff8800');
-            } else { alert("Passwort falsch!"); }
-        }
-
-        function setCheat(mode) {
-            adminMode = mode;
-            document.querySelectorAll('.cheat-btn').forEach(b => b.classList.remove('cheat-active'));
-            document.getElementById('cheat-' + mode).classList.add('cheat-active');
-        }
-
-        function setMoneyAdmin() {
-            const val = parseInt(document.getElementById('admin-money-input').value);
-            if(!isNaN(val)) { money = val; updateUI(); }
-        }
-
-        // --- GAME CORE ---
         function initGame() {
-            document.getElementById('player-name').innerText = document.getElementById('username').value || "User";
+            document.getElementById('player-name').innerText = document.getElementById('username').value || "Spieler";
             document.getElementById('start-overlay').classList.add('hidden');
             updateJackpotValue();
-            startJackpotTimer();
+            setInterval(() => {
+                jackpotTime--;
+                if(jackpotTime < 0) { jackpotTime = 600; updateJackpotValue(); }
+                let m = Math.floor(jackpotTime / 60), s = jackpotTime % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }, 1000);
             applySoundProfile();
             updateUI();
         }
 
-        async function spin() {
-            if (isSpinning) return;
-            const bet = parseInt(document.getElementById('bet-amount').value);
-            if (money < bet) return alert("Zu wenig Guthaben!");
+        function resetAccount() {
+            if(confirm("Guthaben auf $100 zurücksetzen? (Eingelöste Codes bleiben gesperrt)")) {
+                money = 100;
+                updateUI();
+            }
+        }
 
+        function redeemCode() {
+            const input = document.getElementById('redeem-input').value.toUpperCase();
+            
+            if(usedCodes.includes(input)) {
+                alert("Dieser Code wurde bereits eingelöst!");
+                return;
+            }
+
+            if(CODES[input]) {
+                money += CODES[input];
+                usedCodes.push(input); // Markiere Code als benutzt
+                alert(`Erfolgreich! $${CODES[input]} gutgeschrieben.`);
+                document.getElementById('redeem-input').value = "";
+                updateUI();
+                play('win-sound');
+            } else {
+                alert("Ungültiger Code!");
+            }
+        }
+
+        async function spin() {
+            if (isSpinning || money < 10) return;
             isSpinning = true;
-            money -= bet;
+            money -= 10;
             updateUI();
             play('spin-sound');
 
@@ -327,7 +274,6 @@
             const finalRes = [];
             let forcedSymbol = symbols[Math.floor(Math.random() * symbols.length)];
 
-            // Sequenzielles Stoppen
             for (let i = 0; i < 3; i++) {
                 await new Promise(r => setTimeout(r, 800 + i * 500));
                 let res;
@@ -339,65 +285,69 @@
                 reels[i].innerText = res;
                 finalRes.push(res);
             }
-
-            checkResults(finalRes, bet);
+            checkResults(finalRes);
         }
 
-        function checkResults(res, bet) {
+        function checkResults(res) {
             if (res[0] === '7️⃣' && res[1] === '7️⃣' && res[2] === '7️⃣') {
                 play('jackpot-sound');
-                alert("!!! JACKPOT !!! " + jackpot + "€");
                 money += jackpot;
+                alert("JACKPOT! $" + jackpot);
                 updateJackpotValue();
                 endGame();
             } else if (res[0] === res[1] && res[1] === res[2]) {
-                currentWin = bet * 10;
-                play('win-sound');
-                startRisk();
+                currentWin = 100; play('win-sound'); startRisk();
             } else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
-                currentWin = bet * 2;
-                play('win-sound');
-                startRisk();
+                currentWin = 20; play('win-sound'); startRisk();
             } else {
                 endGame();
             }
         }
 
-        function startRisk() {
-            document.getElementById('main-controls').classList.add('hidden');
-            document.getElementById('risk-controls').style.display = 'block';
+        function loginAdmin() {
+            if(document.getElementById('admin-password').value === "admin123") {
+                document.getElementById('admin-login-area').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('admin-badge').classList.remove('hidden');
+                changeColor('#ff8800');
+            }
+        }
+
+        function setCheat(mode) {
+            adminMode = mode;
+            document.querySelectorAll('.cheat-btn').forEach(b => b.classList.remove('cheat-active'));
+            document.getElementById('cheat-' + mode).classList.add('cheat-active');
+        }
+
+        function setMoneyAdmin() {
+            money = parseInt(document.getElementById('admin-money-input').value) || money;
             updateUI();
         }
 
-        function collect() { money += currentWin; currentWin = 0; endGame(); }
-        function gamble() { 
-            if (Math.random() > 0.5) { currentWin *= 2; play('win-sound'); updateUI(); } 
-            else { currentWin = 0; alert("Risiko verloren!"); endGame(); }
-        }
-
-        function endGame() {
-            isSpinning = false;
-            document.getElementById('main-controls').classList.remove('hidden');
-            document.getElementById('risk-controls').style.display = 'none';
-            updateUI();
-        }
-
-        // --- UTILS ---
         function updateUI() { document.getElementById('money').innerText = money; document.getElementById('win-sum').innerText = currentWin; }
         function toggleMenu() { document.getElementById('menu-overlay').classList.toggle('hidden'); }
-        function switchTab(id) {
+        function switchTab(e, id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.menu-tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
+            e.target.classList.add('active');
         }
         function changeColor(c) { document.documentElement.style.setProperty('--neon-color', c); }
-        function updateInputMethod() {
-            const m = document.querySelector('input[name="input-type"]:checked').value;
-            document.getElementById('main-controls').style.display = (m==='button'?'block':'none');
-            document.getElementById('lever-box').style.display = (m==='lever'?'block':'none');
+        function startRisk() { document.getElementById('main-controls').classList.add('hidden'); document.getElementById('risk-controls').style.display = 'block'; }
+        function collect() { money += currentWin; currentWin = 0; endGame(); }
+        function gamble() { if(Math.random() > 0.5) { currentWin *= 2; play('win-sound'); updateUI(); } else { currentWin = 0; endGame(); } }
+        function endGame() { isSpinning = false; document.getElementById('main-controls').classList.remove('hidden'); document.getElementById('risk-controls').style.display = 'none'; updateUI(); }
+        function updateJackpotValue() { jackpot = Math.floor(Math.random() * 50000) + 10000; document.getElementById('jackpot-val').innerText = jackpot; }
+        function applySoundProfile() {
+            const p = SOUNDS[document.getElementById('sound-profile').value];
+            document.getElementById('bg-music').src = p.bg;
+            document.getElementById('spin-sound').src = p.spin;
+            document.getElementById('win-sound').src = p.win;
+            document.getElementById('jackpot-sound').src = p.jackpot;
+            if(soundEnabled) document.getElementById('bg-music').play().catch(()=>{});
         }
-        function pullLever() { if(isSpinning) return; play('button-sound'); document.getElementById('lever-box').classList.add('lever-pull'); setTimeout(()=>{document.getElementById('lever-box').classList.remove('lever-pull'); spin();},300); }
+        function toggleSound() { soundEnabled = document.getElementById('sound-toggle').checked; const bg = document.getElementById('bg-music'); soundEnabled ? bg.play() : bg.pause(); }
+        function play(id) { if(soundEnabled) { const s=document.getElementById(id); s.currentTime=0; s.play().catch(()=>{}); } }
     </script>
 </body>
 </html>
