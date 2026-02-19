@@ -358,6 +358,10 @@
 </div>
 
 <script>
+
+    const GAME_VERSION = 1; // <- Wenn du reset willst, Zahl erhöhen
+
+    
     const SOUNDS = {
         normal: {
             bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
@@ -400,6 +404,22 @@
     let maxXp = 100;
 
     function loadProgress() {
+
+        function loadProgress() {
+    const prefix = username + '_';
+
+    const savedVersion = parseInt(localStorage.getItem(prefix + 'version')) || 0;
+    if (savedVersion !== GAME_VERSION) {
+        localStorage.removeItem(prefix + 'money');
+        localStorage.removeItem(prefix + 'level');
+        localStorage.removeItem(prefix + 'xp');
+        localStorage.removeItem(prefix + 'maxXp');
+        localStorage.removeItem(prefix + 'colors');
+        localStorage.removeItem(prefix + 'backgrounds');
+        localStorage.removeItem(prefix + 'usedPromos');
+        localStorage.setItem(prefix + 'version', GAME_VERSION);
+    }
+
         const prefix = username + '_';
         money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
         playerLevel = parseInt(localStorage.getItem(prefix + 'level')) || 1;
@@ -419,6 +439,8 @@
         localStorage.setItem(prefix + 'maxXp', maxXp);
         localStorage.setItem(prefix + 'colors', JSON.stringify(unlockedColors));
         localStorage.setItem(prefix + 'backgrounds', JSON.stringify(unlockedBackgrounds));
+        localStorage.setItem(prefix + 'version', GAME_VERSION);
+
     }
 
     function addUnlockedColorsToUI() {
