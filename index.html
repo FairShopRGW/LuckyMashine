@@ -308,7 +308,7 @@
                Kaufe Upgrades für bessere Chancen und Styles!
            </p>
            <div class="shop-item">
-               <span>📈 Level Up (Glück +10% pro Level) - $<span id="level-cost">100</span></span>
+               <span>📈 Level Up (Glück +1% pro Level) - $<span id="level-cost">100</span></span>
                <button onclick="buyLevel()">Kaufen</button>
            </div>
            <div class="shop-item">
@@ -826,7 +826,7 @@
         }
 
         if (res[0] === res[1] && res[1] === res[2]) {
-            if (res[0] === '💰') multiplier = 100;
+            if (res[0] === '💰') multiplier = 70;
             else if (res[0] === '🌟') multiplier = 50;
             else if (res[0] === '⭐')  multiplier = 20;
             else multiplier = 10;
@@ -931,7 +931,7 @@
         if (xp >= maxXp) {
             xp -= maxXp;
             playerLevel++;
-            maxXp += 50;
+            maxXp += 100;
             alert(`Level Up! Jetzt Level ${playerLevel}`);
         }
         saveProgress();
