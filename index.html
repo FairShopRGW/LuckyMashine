@@ -403,7 +403,7 @@
     let maxXp = 100;
 
     function loadProgress() {
-        function loadProgress() {
+        
     const prefix = username + '_';
 
     const savedVersion = parseInt(localStorage.getItem(prefix + 'version')) || 0;
@@ -416,17 +416,17 @@
         localStorage.removeItem(prefix + 'backgrounds');
         localStorage.removeItem(prefix + 'usedPromos');
         localStorage.setItem(prefix + 'version', GAME_VERSION);
-    
+        }
 
-        const prefix = username + '_';
-        money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
-        playerLevel = parseInt(localStorage.getItem(prefix + 'level')) || 1;
-        xp = parseInt(localStorage.getItem(prefix + 'xp')) || 0;
-        maxXp = parseInt(localStorage.getItem(prefix + 'maxXp')) || 100;
-        unlockedColors = JSON.parse(localStorage.getItem(prefix + 'colors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = JSON.parse(localStorage.getItem(prefix + 'backgrounds')) || ['#050505'];
-        addUnlockedColorsToUI();
-        updateUI();
+    const prefix = username + '_';
+    money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
+    playerLevel = parseInt(localStorage.getItem(prefix + 'level')) || 1;
+    xp = parseInt(localStorage.getItem(prefix + 'xp')) || 0;
+    maxXp = parseInt(localStorage.getItem(prefix + 'maxXp')) || 100;
+    unlockedColors = JSON.parse(localStorage.getItem(prefix + 'colors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
+    unlockedBackgrounds = JSON.parse(localStorage.getItem(prefix + 'backgrounds')) || ['#050505'];
+    addUnlockedColorsToUI();
+    updateUI();
     }
 
     function saveProgress() {
