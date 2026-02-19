@@ -358,10 +358,6 @@
 </div>
 
 <script>
-
-    const GAME_VERSION = 1; // <- Wenn du reset willst, Zahl erhöhen
-
-    
     const SOUNDS = {
         normal: {
             bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
@@ -389,77 +385,25 @@
         "FREESPINS69":   { amount: 69,    desc: "Nice." }
     };
 
-    let username = '';
-    let money = 100;
-    let playerLevel = 1;
-    let unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-    let unlockedBackgrounds = ['#050505'];
+    let money = parseInt(localStorage.getItem('neonSlotsMoney')) || 100;
+    let playerLevel = parseInt(localStorage.getItem('neonSlotsLevel')) || 1;
+    let unlockedColors = JSON.parse(localStorage.getItem('neonSlotsColors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
+    let unlockedBackgrounds = JSON.parse(localStorage.getItem('neonSlotsBackgrounds')) || ['#050505'];
     let currentWin = 0;
     let isSpinning = false;
     let soundEnabled = true;
     let adminMode = 'normal';
     let jackpot = 0;
     let jackpotTime = 600;
-    let xp = 0;
-    let maxXp = 100;
-
-    function loadProgress() {
-
-        function loadProgress() {
-    const prefix = username + '_';
-
-    const savedVersion = parseInt(localStorage.getItem(prefix + 'version')) || 0;
-    if (savedVersion !== GAME_VERSION) {
-        localStorage.removeItem(prefix + 'money');
-        localStorage.removeItem(prefix + 'level');
-        localStorage.removeItem(prefix + 'xp');
-        localStorage.removeItem(prefix + 'maxXp');
-        localStorage.removeItem(prefix + 'colors');
-        localStorage.removeItem(prefix + 'backgrounds');
-        localStorage.removeItem(prefix + 'usedPromos');
-        localStorage.setItem(prefix + 'version', GAME_VERSION);
-    }
-
-        const prefix = username + '_';
-        money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
-        playerLevel = parseInt(localStorage.getItem(prefix + 'level')) || 1;
-        xp = parseInt(localStorage.getItem(prefix + 'xp')) || 0;
-        maxXp = parseInt(localStorage.getItem(prefix + 'maxXp')) || 100;
-        unlockedColors = JSON.parse(localStorage.getItem(prefix + 'colors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = JSON.parse(localStorage.getItem(prefix + 'backgrounds')) || ['#050505'];
-        addUnlockedColorsToUI();
-        updateUI();
-    }
-
-    function saveProgress() {
-        const prefix = username + '_';
-        localStorage.setItem(prefix + 'money', money);
-        localStorage.setItem(prefix + 'level', playerLevel);
-        localStorage.setItem(prefix + 'xp', xp);
-        localStorage.setItem(prefix + 'maxXp', maxXp);
-        localStorage.setItem(prefix + 'colors', JSON.stringify(unlockedColors));
-        localStorage.setItem(prefix + 'backgrounds', JSON.stringify(unlockedBackgrounds));
-        localStorage.setItem(prefix + 'version', GAME_VERSION);
-
-    }
-
-    function addUnlockedColorsToUI() {
-        const container = document.querySelector('#einstellungen > div[style*="display:flex"]');
-        container.innerHTML = '';
-        unlockedColors.forEach(color => {
-            const div = document.createElement('div');
-            div.onclick = () => changeColor(color);
-            div.style = `width:25px; height:25px; background:${color}; border-radius:50%; cursor:pointer;`;
-            container.appendChild(div);
-        });
-    }
+    let xp = parseInt(localStorage.getItem('neonSlotsXp')) || 0;
+    let maxXp = parseInt(localStorage.getItem('neonSlotsMaxXp')) || 100;
 
     function resetAccount() {
         if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
         money = 100;
         playerLevel = 1;
         unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = ['#050505'];
+        unlockedBackgrounds = ['#050505', '#FF00B7'];
         currentWin = 0;
         isSpinning = false;
         xp = 0;
@@ -471,8 +415,16 @@
         document.getElementById('risk-controls').style.display = 'none';
         saveProgress();
         updateUI();
-        addUnlockedColorsToUI();
         alert("Account wurde zurückgesetzt!");
+    }
+
+    function saveProgress() {
+        localStorage.setItem('neonSlotsMoney', money);
+        localStorage.setItem('neonSlotsLevel', playerLevel);
+        localStorage.setItem('neonSlotsColors', JSON.stringify(unlockedColors));
+        localStorage.setItem('neonSlotsBackgrounds', JSON.stringify(unlockedBackgrounds));
+        localStorage.setItem('neonSlotsXp', xp);
+        localStorage.setItem('neonSlotsMaxXp', maxXp);
     }
 
     function updateJackpotValue() {
@@ -526,7 +478,6 @@
     }
 
     function redeemPromoCode() {
-        const prefix = username + '_';
         const codeInput = document.getElementById('promo-code');
         const msg = document.getElementById('promo-message');
         const code = codeInput.value.trim().toUpperCase();
@@ -536,7 +487,7 @@
             return;
         }
 
-        let usedCodes = JSON.parse(localStorage.getItem(prefix + 'usedPromos') || '[]');
+        const usedCodes = JSON.parse(localStorage.getItem('neonSlotsUsedPromos') || '[]');
 
         if (usedCodes.includes(code)) {
             msg.innerHTML = '<span class="promo-error">Dieser Code wurde bereits eingelöst.</span>';
@@ -548,7 +499,7 @@
             const reward = PROMO_CODES[code].amount;
             money += reward;
             usedCodes.push(code);
-            localStorage.setItem(prefix + 'usedPromos', JSON.stringify(usedCodes));
+            localStorage.setItem('neonSlotsUsedPromos', JSON.stringify(usedCodes));
             msg.innerHTML = `<span class="promo-success">+ $${reward} – ${PROMO_CODES[code].desc}!</span>`;
             play('win-sound');
             updateUI();
@@ -563,7 +514,7 @@
     }
 
     function buyLevel() {
-        const cost = 10000;
+        const cost = 100;
         if (money < cost) {
             alert("Zu wenig Geld!");
             return;
@@ -588,7 +539,11 @@
         money -= cost;
         unlockedColors.push(color);
         alert(`Neue Farbe freigeschaltet: ${color}`);
-        addUnlockedColorsToUI();
+        // Füge zur Farbauswahl hinzu (dynamisch)
+        const colorDiv = document.createElement('div');
+        colorDiv.onclick = () => changeColor(color);
+        colorDiv.style = `width:25px; height:25px; background:${color}; border-radius:50%; cursor:pointer;`;
+        document.querySelector('#einstellungen > div[style*="display:flex"]').appendChild(colorDiv);
         saveProgress();
         updateUI();
     }
@@ -655,10 +610,8 @@
     }
 
     function initGame() {
-        username = document.getElementById('username').value || "User";
-        document.getElementById('player-name').innerText = username;
+        document.getElementById('player-name').innerText = document.getElementById('username').value || "User";
         document.getElementById('start-overlay').classList.add('hidden');
-        loadProgress();
         updateJackpotValue();
         startJackpotTimer();
         applySoundProfile();
@@ -844,28 +797,11 @@
         setTimeout(() => {
             const levelBar = document.getElementById('level-bar');
             const barRect = levelBar.getBoundingClientRect();
-            xpGain.style.transform = `translate(${barRect.left + barRect.width / 2 - slotRow.offsetLeft - slotRow.offsetWidth / 2}px, ${barRect.top - slotRow.offsetTop - slotRow.offsetHeight}px) scale(0.01)`;
+            xpGain.style.transform = `translate(${barRect.left + barRect.width / 2 - slotRow.offsetLeft - slotRow.offsetWidth / 2}px, ${barRect.top - slotRow.offsetTop - slotRow.offsetHeight}px) scale(0.5)`;
             xpGain.style.opacity = 0;
         }, 10);
         setTimeout(() => xpGain.remove(), 1000);
     }
-    function buyLevel() {
-    const baseCost = 10000;
-    const costIncrease = 5000;
-    const cost = baseCost + (playerLevel - 1) * costIncrease;
-
-    if (money < cost) {
-        alert(`Zu wenig Geld! Nächstes Level kostet $${cost}`);
-        return;
-    }
-
-    money -= cost;
-    playerLevel += 1;
-    alert(`Level Up! Jetzt Level ${playerLevel}. Nächstes Level kostet $${baseCost + (playerLevel - 1) * costIncrease}`);
-    saveProgress();
-    updateUI();
-}
-
 </script>
 
 </body>
