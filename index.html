@@ -45,7 +45,7 @@
 
         .casino-container {
             background: #111;
-            padding: 80px 40px 40px 40px;           /* mehr Platz oben */
+            padding: 80px 40px 40px 40px;
             border: 2px solid var(--neon-color);
             border-radius: 20px;
             box-shadow: 0 0 20px var(--neon-color);
@@ -94,7 +94,7 @@
             width: 100%;
             display: flex;
             justify-content: space-between;
-            margin: 50px 0 30px 0;                  /* deutlich mehr Abstand nach oben */
+            margin: 50px 0 30px 0;
             font-size: 1.3rem;
             padding: 0 15px;
             box-sizing: border-box;
@@ -148,7 +148,6 @@
             font-size: 0.8rem;
         }
 
-        /* Verbessertes Styling für den Einstellungs-Button */
         button[onclick="toggleMenu()"] {
             position: absolute;
             top: 15px;
@@ -175,7 +174,6 @@
             box-shadow: 0 0 15px var(--neon-color);
         }
 
-        /* Neue Styles für XP-System */
         #level-bar {
             width: 100%;
             background: #333;
@@ -205,6 +203,7 @@
 </head>
 
 <body>
+
 <audio id="police-siren"></audio>
 <audio id="bg-music" loop></audio>
 <audio id="spin-sound"></audio>
@@ -242,11 +241,7 @@
            <label><input type="radio" name="input-type" value="button" checked onchange="updateInputMethod()"> Button</label>
            <label><input type="radio" name="input-type" value="lever" onchange="updateInputMethod()"> Hebel</label>
            <p>Farbe:</p>
-           <div style="display:flex; gap:10px;">
-               <div onclick="changeColor('#00ffff')" style="width:25px; height:25px; background:#00ffff; border-radius:50%; cursor:pointer;"></div>
-               <div onclick="changeColor('#ff00ff')" style="width:25px; height:25px; background:#ff00ff; border-radius:50%; cursor:pointer;"></div>
-               <div onclick="changeColor('#33ff33')" style="width:25px; height:25px; background:#33ff33; border-radius:50%; cursor:pointer;"></div>
-           </div>
+           <div id="color-picker" style="display:flex; gap:10px;"></div>
 
            <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
            <button onclick="resetAccount()" style="width:100%; border-color:#ff3333; color:#ff3333;">
@@ -282,7 +277,7 @@
                Kaufe Upgrades für bessere Chancen und Styles!
            </p>
            <div class="shop-item">
-               <span>📈 Level Up (Glück +1% pro Level) - $100</span>
+               <span>📈 Level Up (Glück +10% pro Level) - $100</span>
                <button onclick="buyLevel()">Kaufen</button>
            </div>
            <div class="shop-item">
@@ -293,7 +288,6 @@
                <span>🎨 Neue Farbe: Rot - $50</span>
                <button onclick="buyColor('#ff0000')">Kaufen</button>
            </div>
-        
            <div id="shop-message" style="margin-top:15px; min-height:40px; font-size:1.1rem;"></div>
        </div>
 
@@ -358,73 +352,10 @@
 </div>
 
 <script>
-    let debtLimit = -100;
+    const debtLimit = -100;
     let isInPrison = false;
-    let prisonReleaseTime = 0; 
-    
-    function playPoliceSiren() {
-    if (!soundEnabled) return;
-    const siren = document.getElementById('police-siren');
-    if (!siren) return;
-    siren.currentTime = 0;
-    siren.play().catch(() => {});
-}
-   
-    function goToPrison() {
-    isInPrison = true;
-    prisonReleaseTime = Date.now() + 8000; // 8 Sekunden Gefängnis
+    let prisonReleaseTime = 0;
 
-    const prisonOverlay = document.createElement('div');
-    prisonOverlay.id = 'prison-overlay';
-    prisonOverlay.className = 'overlay';
-    prisonOverlay.innerHTML = `
-        <div style="background:#8B0000; padding:40px; border:4px solid #ff0000; border-radius:15px; text-align:center; max-width:420px;">
-            <h1 style="color:#ff4444; font-size:3rem; margin:0;">BANKROTT & ARRESTIERT!</h1>
-            <p style="font-size:1.4rem; margin:20px 0;">Du bist jetzt <strong>virtuell im Knast</strong>!<br>
-            Schulden über -100 € → Polizei wurde gerufen!</p>
-            <p id="prison-countdown" style="font-size:2.2rem; color:#ffff00; margin:30px 0;">Entlassung in 8 Sekunden...</p>
-            <button onclick="closePrison()" style="background:#000; color:#ff4444; border:2px solid #ff4444; padding:15px 40px; font-size:1.3rem;">
-                Warten...
-            </button>
-        </div>
-    `;
-    document.body.appendChild(prisonOverlay);
-
-    playPoliceSiren();
-
-    // Countdown
-    const countdownEl = document.getElementById('prison-countdown');
-    const btn = prisonOverlay.querySelector('button');
-    let remaining = 8;
-
-    const interval = setInterval(() => {
-        remaining--;
-        if (remaining <= 0) {
-            clearInterval(interval);
-            closePrison();
-        } else {
-            countdownEl.innerText = `Entlassung in ${remaining} Sekunden...`;
-            btn.innerText = `Noch ${remaining}s warten`;
-        }
-    }, 1000);
-
-    // Auto-Release nach Zeit (falls jemand den Button nicht drückt)
-    setTimeout(() => {
-        if (isInPrison) closePrison();
-    }, 8500);
-}
-
-function closePrison() {
-    isInPrison = false;
-    const overlay = document.getElementById('prison-overlay');
-    if (overlay) overlay.remove();
-    money = 0;
-    updateUI();
-    saveProgress();
-    alert("Du bist wieder frei – aber pleite! Starte neu mit $100 oder gib Promo-Codes ein.");
-}
-
-    
     const SOUNDS = {
         normal: {
             bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
@@ -445,7 +376,6 @@ function closePrison() {
         }
     };
 
-    // Hier Gutschein-Codes ändern: Füge neue Codes hinzu oder bearbeite bestehende.
     const PROMO_CODES = {
         "NEON2025":      { amount: 250,   desc: "Willkommens-Boost" },
         "JACKPOTKING":   { amount: 1000,  desc: "Highroller-Geschenk" },
@@ -458,7 +388,6 @@ function closePrison() {
     let money = 100;
     let playerLevel = 1;
     let unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-    let unlockedBackgrounds = ['#050505'];
     let currentWin = 0;
     let isSpinning = false;
     let soundEnabled = true;
@@ -468,6 +397,57 @@ function closePrison() {
     let xp = 0;
     let maxXp = 100;
 
+    function playPoliceSiren() {
+        if (!soundEnabled) return;
+        const siren = document.getElementById('police-siren');
+        siren.currentTime = 0;
+        siren.play().catch(() => {});
+    }
+
+    function goToPrison() {
+        isInPrison = true;
+        prisonReleaseTime = Date.now() + 8000;
+
+        const prisonOverlay = document.createElement('div');
+        prisonOverlay.id = 'prison-overlay';
+        prisonOverlay.className = 'overlay';
+        prisonOverlay.innerHTML = `
+            <div style="background:#8B0000; padding:40px; border:4px solid #ff0000; border-radius:15px; text-align:center; max-width:420px;">
+                <h1 style="color:#ff4444; font-size:3rem; margin:0;">BANKROTT & ARRESTIERT!</h1>
+                <p style="font-size:1.4rem; margin:20px 0;">Du bist jetzt <strong>virtuell im Knast</strong>!<br>Schulden über -100 € → Polizei!</p>
+                <p id="prison-countdown" style="font-size:2.2rem; color:#ffff00; margin:30px 0;">Entlassung in 8 Sekunden...</p>
+                <button onclick="closePrison()" style="background:#000; color:#ff4444; border:2px solid #ff4444; padding:15px 40px; font-size:1.3rem;">Warten...</button>
+            </div>
+        `;
+        document.body.appendChild(prisonOverlay);
+        playPoliceSiren();
+
+        let remaining = 8;
+        const countdownEl = document.getElementById('prison-countdown');
+        const btn = prisonOverlay.querySelector('button');
+        const interval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(interval);
+                closePrison();
+            } else {
+                countdownEl.innerText = `Entlassung in ${remaining} Sekunden...`;
+                btn.innerText = `Noch ${remaining}s warten`;
+            }
+        }, 1000);
+
+        setTimeout(() => { if (isInPrison) closePrison(); }, 8500);
+    }
+
+    function closePrison() {
+        isInPrison = false;
+        document.getElementById('prison-overlay')?.remove();
+        money = 0;
+        updateUI();
+        saveProgress();
+        alert("Du bist wieder frei – aber pleite! Starte neu mit $100 oder Promo-Codes.");
+    }
+
     function loadProgress() {
         const prefix = username + '_';
         money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
@@ -475,7 +455,6 @@ function closePrison() {
         xp = parseInt(localStorage.getItem(prefix + 'xp')) || 0;
         maxXp = parseInt(localStorage.getItem(prefix + 'maxXp')) || 100;
         unlockedColors = JSON.parse(localStorage.getItem(prefix + 'colors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = JSON.parse(localStorage.getItem(prefix + 'backgrounds')) || ['#050505'];
         addUnlockedColorsToUI();
         updateUI();
     }
@@ -487,11 +466,10 @@ function closePrison() {
         localStorage.setItem(prefix + 'xp', xp);
         localStorage.setItem(prefix + 'maxXp', maxXp);
         localStorage.setItem(prefix + 'colors', JSON.stringify(unlockedColors));
-        localStorage.setItem(prefix + 'backgrounds', JSON.stringify(unlockedBackgrounds));
     }
 
     function addUnlockedColorsToUI() {
-        const container = document.querySelector('#einstellungen > div[style*="display:flex"]');
+        const container = document.getElementById('color-picker');
         container.innerHTML = '';
         unlockedColors.forEach(color => {
             const div = document.createElement('div');
@@ -502,13 +480,10 @@ function closePrison() {
     }
 
     function resetAccount() {
-        if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
+        if (!confirm("Account wirklich zurücksetzen?")) return;
         money = 100;
         playerLevel = 1;
         unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = ['#050505'];
-        currentWin = 0;
-        isSpinning = false;
         xp = 0;
         maxXp = 100;
         document.getElementById('reel1').innerText = '💎';
@@ -519,7 +494,7 @@ function closePrison() {
         saveProgress();
         updateUI();
         addUnlockedColorsToUI();
-        alert("Account wurde zurückgesetzt!");
+        alert("Account zurückgesetzt!");
     }
 
     function updateJackpotValue() {
@@ -530,7 +505,10 @@ function closePrison() {
     function startJackpotTimer() {
         setInterval(() => {
             jackpotTime--;
-            if (jackpotTime <= 0) { jackpotTime = 600; updateJackpotValue(); }
+            if (jackpotTime <= 0) {
+                jackpotTime = 600;
+                updateJackpotValue();
+            }
             const mins = Math.floor(jackpotTime / 60);
             const secs = jackpotTime % 60;
             document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -545,28 +523,26 @@ function closePrison() {
         document.getElementById('win-sound').src = p.win;
         document.getElementById('jackpot-sound').src = p.jackpot;
         document.getElementById('button-sound').src = p.btn;
-        if (profile === 'meme' && p.lose) {
-            document.getElementById('lose-sound').src = p.lose;
-        }
-        if(soundEnabled) document.getElementById('bg-music').play().catch(()=>{});
+        if (profile === 'meme' && p.lose) document.getElementById('lose-sound').src = p.lose;
+        if (soundEnabled) document.getElementById('bg-music').play().catch(()=>{});
     }
 
     function toggleSound() {
         soundEnabled = document.getElementById('sound-toggle').checked;
         const bg = document.getElementById('bg-music');
-        soundEnabled ? bg.play() : bg.pause();
+        soundEnabled ? bg.play().catch(()=>{}) : bg.pause();
     }
 
     function play(id) {
         if (!soundEnabled) return;
         const s = document.getElementById(id);
-        if (!s) return;
-        s.currentTime = 0;
-        s.play().catch(()=>{});
+        if (s) {
+            s.currentTime = 0;
+            s.play().catch(()=>{});
+        }
     }
 
     function playLoseIfMeme() {
-        if (!soundEnabled) return;
         if (document.getElementById('sound-profile').value === 'meme') {
             play('lose-sound');
         }
@@ -583,10 +559,9 @@ function closePrison() {
             return;
         }
 
-        let usedCodes = JSON.parse(localStorage.getItem(prefix + 'usedPromos') || '[]');
-
-        if (usedCodes.includes(code)) {
-            msg.innerHTML = '<span class="promo-error">Dieser Code wurde bereits eingelöst.</span>';
+        let used = JSON.parse(localStorage.getItem(prefix + 'usedPromos') || '[]');
+        if (used.includes(code)) {
+            msg.innerHTML = '<span class="promo-error">Code bereits benutzt.</span>';
             codeInput.value = '';
             return;
         }
@@ -594,14 +569,12 @@ function closePrison() {
         if (PROMO_CODES[code]) {
             const reward = PROMO_CODES[code].amount;
             money += reward;
-            usedCodes.push(code);
-            localStorage.setItem(prefix + 'usedPromos', JSON.stringify(usedCodes));
+            used.push(code);
+            localStorage.setItem(prefix + 'usedPromos', JSON.stringify(used));
             msg.innerHTML = `<span class="promo-success">+ $${reward} – ${PROMO_CODES[code].desc}!</span>`;
             play('win-sound');
             updateUI();
             saveProgress();
-            msg.style.animation = 'pulse 1.2s';
-            setTimeout(() => { msg.style.animation = ''; }, 1500);
             codeInput.value = '';
         } else {
             msg.innerHTML = '<span class="promo-error">Ungültiger Code.</span>';
@@ -611,84 +584,35 @@ function closePrison() {
 
     function buyLevel() {
         const cost = 100;
-        if (money < cost) {
-            alert("Zu wenig Geld!");
-            return;
-        }
+        if (money < cost) return alert("Zu wenig Geld!");
         money -= cost;
-        playerLevel += 1;
-        alert(`Level up! Jetzt Level ${playerLevel}. Glück erhöht!`);
+        playerLevel++;
+        alert(`Level up! Jetzt Level ${playerLevel}`);
         saveProgress();
         updateUI();
     }
 
     function buyColor(color) {
         const cost = 50;
-        if (money < cost) {
-            alert("Zu wenig Geld!");
-            return;
-        }
-        
-        if (unlockedColors.includes(color)) {
-            alert("Farbe bereits freigeschaltet!");
-            return;
-        }
+        if (money < cost) return alert("Zu wenig Geld!");
+        if (unlockedColors.includes(color)) return alert("Farbe bereits freigeschaltet!");
         money -= cost;
         unlockedColors.push(color);
-        alert(`Neue Farbe freigeschaltet: ${color}`);
+        alert(`Farbe freigeschaltet: ${color}`);
         addUnlockedColorsToUI();
         saveProgress();
         updateUI();
     }
 
-    function buyBackground(bg) {
-        const cost = 200;
-        if (money < cost) {
-            alert("Zu wenig Geld!");
-            return;
-        }
-        if (unlockedBackgrounds.includes(bg)) {
-            alert("Hintergrund bereits freigeschaltet!");
-            return;
-        }
-        money -= cost;
-        unlockedBackgrounds.push(bg);
-        alert(`Neuer Hintergrund freigeschaltet!`);
-        // Füge zur Auswahl hinzu (z.B. in Einstellungen)
-        const bgSelect = document.createElement('select');
-        bgSelect.onchange = () => changeBackground(bgSelect.value);
-        unlockedBackgrounds.forEach(b => {
-            const opt = document.createElement('option');
-            opt.value = b;
-            opt.text = b === '#050505' ? 'Standard' : b;
-            bgSelect.add(opt);
-        });
-        const bgSection = document.createElement('div');
-        bgSection.innerHTML = '<p>Hintergrund:</p>';
-        bgSection.appendChild(bgSelect);
-        document.getElementById('einstellungen').appendChild(bgSection);
-        saveProgress();
-        updateUI();
-    }
-
-    function changeBackground(bg) {
-        if (bg.startsWith('url')) {
-            document.body.style.backgroundImage = bg;
-            document.body.style.backgroundColor = '';
-        } else {
-            document.body.style.backgroundColor = bg;
-            document.body.style.backgroundImage = '';
-        }
-        document.documentElement.style.setProperty('--bg-color', bg.startsWith('#') ? bg : 'transparent');
-    }
-
     function loginAdmin() {
-        if(document.getElementById('admin-password').value === "admin123") {
+        if (document.getElementById('admin-password').value === "admin123") {
             document.getElementById('admin-login-area').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
             document.getElementById('admin-badge').classList.remove('hidden');
             changeColor('#ff8800');
-        } else { alert("Passwort falsch!"); }
+        } else {
+            alert("Passwort falsch!");
+        }
     }
 
     function setCheat(mode) {
@@ -699,44 +623,49 @@ function closePrison() {
 
     function setMoneyAdmin() {
         const val = parseInt(document.getElementById('admin-money-input').value);
-        if(!isNaN(val)) { money = val; updateUI(); saveProgress(); }
+        if (!isNaN(val)) {
+            money = val;
+            updateUI();
+            saveProgress();
+        }
     }
 
     function initGame() {
-        username = document.getElementById('username').value || "User";
+        username = document.getElementById('username').value.trim() || "User";
         document.getElementById('player-name').innerText = username;
         document.getElementById('start-overlay').classList.add('hidden');
         loadProgress();
         updateJackpotValue();
         startJackpotTimer();
         applySoundProfile();
-        updateUI();
+        updateInputMethod();
     }
 
     async function spin() {
         if (isSpinning) return;
-        const bet = parseInt(document.getElementById('bet-amount').value);
-        if (isInPrison) {
-    alert("Du sitzt noch im virtuellen Knast! Warte auf Entlassung.");
-    return;
-}
 
-if (money - bet < debtLimit) {
-    playPoliceSiren();
-    alert("Du darfst nur bis -100 $ verschulden!\nWeiterer Spin würde dich tiefer ins Minus bringen → POLIZEI!");
-    goToPrison();
-    return;
-}
+        const bet = parseInt(document.getElementById('bet-amount').value) || 10;
+        if (bet < 1) return alert("Einsatz mindestens 1 €");
 
-if (money < bet && money >= debtLimit) {
-    // Erlaubt Minus, aber warnt
-    if (!confirm("Du gehst ins Minus! Fortfahren?")) return;
-}
+        if (isInPrison) return alert("Du sitzt noch im Knast – warte auf Entlassung.");
 
-money -= bet;
+        // Prüfung vor dem Abzug
+        if (money - bet < debtLimit) {
+            playPoliceSiren();
+            alert("Limit -100 € erreicht!\nWeiterer Spin → POLIZEI!");
+            goToPrison();
+            return;
+        }
+
+        // Warnung bei Minus
+        if (money < bet) {
+            if (!confirm(`Du gehst ins Minus (${money - bet} €). Fortfahren?`)) return;
+        }
+
+        // ── HIER WAR DER FEHLER ── nur einmal abziehen!
+        money -= bet;
 
         isSpinning = true;
-        money -= bet;
         updateUI();
         saveProgress();
         play('spin-sound');
@@ -744,68 +673,61 @@ money -= bet;
         const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
         reels.forEach(r => r.classList.add('spinning'));
 
-        // Erweiterte Symbole mit Seltenheiten
-        const symbols = [
-            '🍒', '🍋', '💎', '🔔', '🍇', // Häufig
-            '⭐', // Super selten (x20 Multi)
-            '🌟', // Ober selten (x50 Multi)
-            '💰'  // Mega selten (x100 Multi)
-        ];
-
-        // Wahrscheinlichkeiten: Basis + Level-Bonus (pro Level +1% Chance auf bessere Symbole)
-        const luckBoost = playerLevel * 0.10; // +10% pro Level
+        const luckBoost = playerLevel * 0.10;
         const finalRes = [];
-        let forcedSymbol = getRandomSymbol(luckBoost);
 
         for (let i = 0; i < 3; i++) {
             await new Promise(r => setTimeout(r, 800 + i * 500));
-            let res;
-            if (adminMode === 'jackpot') res = '7️⃣';
-            else if (adminMode === 'win') res = forcedSymbol;
-            else res = getRandomSymbol(luckBoost);
+            let symbol;
+            if      (adminMode === 'jackpot') symbol = '7️⃣';
+            else if (adminMode === 'win')     symbol = getRandomSymbol(luckBoost);
+            else                              symbol = getRandomSymbol(luckBoost);
 
             reels[i].classList.remove('spinning');
-            reels[i].innerText = res;
-            finalRes.push(res);
+            reels[i].innerText = symbol;
+            finalRes.push(symbol);
         }
 
-        // XP hinzufügen nach jedem Spin
-        addXp(10); // 10 XP pro Spin
-
+        addXp(10);
         checkResults(finalRes, bet);
     }
 
-    function getRandomSymbol(luckBoost) {
-        const rand = Math.random();
-        if (rand < 0.05 + luckBoost * 0.5) return '💰'; // Mega selten, Boost erhöht Chance
-        if (rand < 0.1 + luckBoost * 0.4) return '🌟'; // Ober selten
-        if (rand < 0.2 + luckBoost * 0.3) return '⭐'; // Super selten
-        if (rand < 0.3 + luckBoost * 0.1) return '7️⃣'; // Jackpot Symbol
-        return ['🍒', '🍋', '💎', '🔔', '🍇'][Math.floor(Math.random() * 5)]; // Häufig
+    function getRandomSymbol(luck) {
+        const r = Math.random();
+        if (r < 0.05 + luck * 0.5) return '💰';
+        if (r < 0.10 + luck * 0.4) return '🌟';
+        if (r < 0.20 + luck * 0.3) return '⭐';
+        if (r < 0.30 + luck * 0.1) return '7️⃣';
+        return ['🍒','🍋','💎','🔔','🍇'][Math.floor(Math.random()*5)];
     }
 
     function checkResults(res, bet) {
         let multiplier = 0;
-        if (res[0] === '7️⃣' && res[1] === '7️⃣' && res[2] === '7️⃣') {
+
+        if (res.join('') === '7️⃣7️⃣7️⃣') {
             play('jackpot-sound');
-            alert("!!! JACKPOT !!! " + jackpot + "€");
+            alert("!!! JACKPOT !!! $" + jackpot);
             money += jackpot;
             updateJackpotValue();
             endGame();
             return;
-        } else if (res[0] === res[1] && res[1] === res[2]) {
-            if (res[0] === '💰') multiplier = 100;
+        }
+
+        if (res[0] === res[1] && res[1] === res[2]) {
+            if      (res[0] === '💰') multiplier = 100;
             else if (res[0] === '🌟') multiplier = 50;
-            else if (res[0] === '⭐') multiplier = 20;
-            else multiplier = 10;
+            else if (res[0] === '⭐')  multiplier = 20;
+            else                      multiplier = 10;
             currentWin = bet * multiplier;
             play('win-sound');
             startRisk();
-        } else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
+        }
+        else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
             currentWin = bet * 2;
             play('win-sound');
             startRisk();
-        } else {
+        }
+        else {
             playLoseIfMeme();
             endGame();
         }
@@ -832,7 +754,7 @@ money -= bet;
         } else {
             currentWin = 0;
             playLoseIfMeme();
-            alert("Risiko verloren! Was’n Fail ey...");
+            alert("Risiko verloren!");
             endGame();
         }
     }
@@ -846,26 +768,20 @@ money -= bet;
     }
 
     function updateUI() {
-        document.getElementById('money').innerText = money;
+        const moneyEl = document.getElementById('money');
+        moneyEl.innerText = money;
+
+        if (money < 0) {
+            moneyEl.style.color = '#ff4444';
+            moneyEl.style.textShadow = '0 0 10px #ff0000';
+        } else {
+            moneyEl.style.color = '#33ff33';
+            moneyEl.style.textShadow = 'none';
+        }
+
         document.getElementById('win-sum').innerText = currentWin;
         document.getElementById('player-level').innerText = playerLevel;
         document.getElementById('level-progress').style.width = (xp / maxXp * 100) + '%';
-        function updateUI() {
-    const moneyEl = document.getElementById('money');
-    moneyEl.innerText = money;
-    
-    if (money < 0) {
-        moneyEl.style.color = '#ff4444';
-        moneyEl.style.textShadow = '0 0 10px #ff0000';
-    } else {
-        moneyEl.style.color = '#33ff33';
-        moneyEl.style.textShadow = 'none';
-    }
-
-    document.getElementById('win-sum').innerText = currentWin;
-    document.getElementById('player-level').innerText = playerLevel;
-    document.getElementById('level-progress').style.width = (xp / maxXp * 100) + '%';
-}
     }
 
     function toggleMenu() {
@@ -884,13 +800,13 @@ money -= bet;
     }
 
     function updateInputMethod() {
-        const m = document.querySelector('input[name="input-type"]:checked').value;
-        document.getElementById('main-controls').style.display = (m==='button'?'block':'none');
-        document.getElementById('lever-box').style.display = (m==='lever'?'block':'none');
+        const mode = document.querySelector('input[name="input-type"]:checked').value;
+        document.getElementById('main-controls').style.display = mode === 'button' ? 'block' : 'none';
+        document.getElementById('lever-box').style.display = mode === 'lever' ? 'block' : 'none';
     }
 
     function pullLever() {
-        if(isSpinning) return;
+        if (isSpinning) return;
         play('button-sound');
         document.getElementById('lever-box').classList.add('lever-pull');
         setTimeout(() => {
@@ -905,7 +821,7 @@ money -= bet;
         if (xp >= maxXp) {
             xp -= maxXp;
             playerLevel++;
-            maxXp += 50; // Erhöhe Max-XP pro Level
+            maxXp += 50;
             alert(`Level Up! Jetzt Level ${playerLevel}`);
         }
         saveProgress();
@@ -913,22 +829,25 @@ money -= bet;
     }
 
     function showXpGain(amount) {
-        const xpGain = document.createElement('div');
-        xpGain.classList.add('xp-gain');
-        xpGain.innerText = `+${amount} XP`;
-        // Positioniere über dem Slot-Machine
-        const slotRow = document.querySelector('.slot-row');
-        xpGain.style.left = `${slotRow.offsetLeft + slotRow.offsetWidth / 2}px`;
-        xpGain.style.top = `${slotRow.offsetTop + slotRow.offsetHeight}px`;
-        document.body.appendChild(xpGain);
-        // Ziel: Fliege zur Level-Bar
+        const el = document.createElement('div');
+        el.className = 'xp-gain';
+        el.innerText = `+${amount} XP`;
+        document.body.appendChild(el);
+
+        const slot = document.querySelector('.slot-row');
+        const bar = document.getElementById('level-bar');
+        const sRect = slot.getBoundingClientRect();
+        const bRect = bar.getBoundingClientRect();
+
+        el.style.left = (sRect.left + sRect.width/2) + 'px';
+        el.style.top  = (sRect.top + sRect.height) + 'px';
+
         setTimeout(() => {
-            const levelBar = document.getElementById('level-bar');
-            const barRect = levelBar.getBoundingClientRect();
-            xpGain.style.transform = `translate(${barRect.left + barRect.width / 2 - slotRow.offsetLeft - slotRow.offsetWidth / 2}px, ${barRect.top - slotRow.offsetTop - slotRow.offsetHeight}px) scale(0.5)`;
-            xpGain.style.opacity = 0;
-        }, 10);
-        setTimeout(() => xpGain.remove(), 1000);
+            el.style.transform = `translate(${bRect.left + bRect.width/2 - sRect.left - sRect.width/2}px, ${bRect.top - sRect.top - sRect.height}px) scale(0.5)`;
+            el.style.opacity = '0';
+        }, 20);
+
+        setTimeout(() => el.remove(), 1200);
     }
 </script>
 
