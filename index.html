@@ -541,7 +541,7 @@
     }
 
     function buyLevel() {
-        const cost = 100;
+        const cost = 10000;
         if (money < cost) {
             alert("Zu wenig Geld!");
             return;
@@ -822,7 +822,7 @@
         setTimeout(() => {
             const levelBar = document.getElementById('level-bar');
             const barRect = levelBar.getBoundingClientRect();
-            xpGain.style.transform = `translate(${barRect.left + barRect.width / 2 - slotRow.offsetLeft - slotRow.offsetWidth / 2}px, ${barRect.top - slotRow.offsetTop - slotRow.offsetHeight}px) scale(0.5)`;
+            xpGain.style.transform = `translate(${barRect.left + barRect.width / 2 - slotRow.offsetLeft - slotRow.offsetWidth / 2}px, ${barRect.top - slotRow.offsetTop - slotRow.offsetHeight}px) scale(0.01)`;
             xpGain.style.opacity = 0;
         }, 10);
         setTimeout(() => xpGain.remove(), 1000);
