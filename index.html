@@ -583,7 +583,7 @@
     }
 
     function buyLevel() {
-        const cost = 100;
+        const cost = 10000;
         if (money < cost) return alert("Zu wenig Geld!");
         money -= cost;
         playerLevel++;
@@ -821,7 +821,7 @@
         if (xp >= maxXp) {
             xp -= maxXp;
             playerLevel++;
-            maxXp += 50;
+            maxXp += 100;
             alert(`Level Up! Jetzt Level ${playerLevel}`);
         }
         saveProgress();
