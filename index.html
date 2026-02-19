@@ -453,6 +453,19 @@
         }
     });
 
+    // Musik stoppen, wenn die Seite verlassen wird (visibilitychange)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            const bg = document.getElementById('bg-music');
+            bg.pause();
+        } else {
+            if (soundEnabled) {
+                const bg = document.getElementById('bg-music');
+                bg.play().catch(() => {});
+            }
+        }
+    });
+
     function playPoliceSiren() {
         if (!soundEnabled) return;
         const siren = document.getElementById('police-siren');
