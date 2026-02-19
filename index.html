@@ -385,25 +385,59 @@
         "FREESPINS69":   { amount: 69,    desc: "Nice." }
     };
 
-    let money = parseInt(localStorage.getItem('neonSlotsMoney')) || 100;
-    let playerLevel = parseInt(localStorage.getItem('neonSlotsLevel')) || 1;
-    let unlockedColors = JSON.parse(localStorage.getItem('neonSlotsColors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-    let unlockedBackgrounds = JSON.parse(localStorage.getItem('neonSlotsBackgrounds')) || ['#050505'];
+    let username = '';
+    let money = 100;
+    let playerLevel = 1;
+    let unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
+    let unlockedBackgrounds = ['#050505'];
     let currentWin = 0;
     let isSpinning = false;
     let soundEnabled = true;
     let adminMode = 'normal';
     let jackpot = 0;
     let jackpotTime = 600;
-    let xp = parseInt(localStorage.getItem('neonSlotsXp')) || 0;
-    let maxXp = parseInt(localStorage.getItem('neonSlotsMaxXp')) || 100;
+    let xp = 0;
+    let maxXp = 100;
+
+    function loadProgress() {
+        const prefix = username + '_';
+        money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
+        playerLevel = parseInt(localStorage.getItem(prefix + 'level')) || 1;
+        xp = parseInt(localStorage.getItem(prefix + 'xp')) || 0;
+        maxXp = parseInt(localStorage.getItem(prefix + 'maxXp')) || 100;
+        unlockedColors = JSON.parse(localStorage.getItem(prefix + 'colors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
+        unlockedBackgrounds = JSON.parse(localStorage.getItem(prefix + 'backgrounds')) || ['#050505'];
+        addUnlockedColorsToUI();
+        updateUI();
+    }
+
+    function saveProgress() {
+        const prefix = username + '_';
+        localStorage.setItem(prefix + 'money', money);
+        localStorage.setItem(prefix + 'level', playerLevel);
+        localStorage.setItem(prefix + 'xp', xp);
+        localStorage.setItem(prefix + 'maxXp', maxXp);
+        localStorage.setItem(prefix + 'colors', JSON.stringify(unlockedColors));
+        localStorage.setItem(prefix + 'backgrounds', JSON.stringify(unlockedBackgrounds));
+    }
+
+    function addUnlockedColorsToUI() {
+        const container = document.querySelector('#einstellungen > div[style*="display:flex"]');
+        container.innerHTML = '';
+        unlockedColors.forEach(color => {
+            const div = document.createElement('div');
+            div.onclick = () => changeColor(color);
+            div.style = `width:25px; height:25px; background:${color}; border-radius:50%; cursor:pointer;`;
+            container.appendChild(div);
+        });
+    }
 
     function resetAccount() {
         if(!confirm("Willst du deinen Account wirklich zurücksetzen?")) return;
         money = 100;
         playerLevel = 1;
         unlockedColors = ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
-        unlockedBackgrounds = ['#050505', '#FF00B7'];
+        unlockedBackgrounds = ['#050505'];
         currentWin = 0;
         isSpinning = false;
         xp = 0;
@@ -415,16 +449,8 @@
         document.getElementById('risk-controls').style.display = 'none';
         saveProgress();
         updateUI();
+        addUnlockedColorsToUI();
         alert("Account wurde zurückgesetzt!");
-    }
-
-    function saveProgress() {
-        localStorage.setItem('neonSlotsMoney', money);
-        localStorage.setItem('neonSlotsLevel', playerLevel);
-        localStorage.setItem('neonSlotsColors', JSON.stringify(unlockedColors));
-        localStorage.setItem('neonSlotsBackgrounds', JSON.stringify(unlockedBackgrounds));
-        localStorage.setItem('neonSlotsXp', xp);
-        localStorage.setItem('neonSlotsMaxXp', maxXp);
     }
 
     function updateJackpotValue() {
@@ -478,6 +504,7 @@
     }
 
     function redeemPromoCode() {
+        const prefix = username + '_';
         const codeInput = document.getElementById('promo-code');
         const msg = document.getElementById('promo-message');
         const code = codeInput.value.trim().toUpperCase();
@@ -487,7 +514,7 @@
             return;
         }
 
-        const usedCodes = JSON.parse(localStorage.getItem('neonSlotsUsedPromos') || '[]');
+        let usedCodes = JSON.parse(localStorage.getItem(prefix + 'usedPromos') || '[]');
 
         if (usedCodes.includes(code)) {
             msg.innerHTML = '<span class="promo-error">Dieser Code wurde bereits eingelöst.</span>';
@@ -499,7 +526,7 @@
             const reward = PROMO_CODES[code].amount;
             money += reward;
             usedCodes.push(code);
-            localStorage.setItem('neonSlotsUsedPromos', JSON.stringify(usedCodes));
+            localStorage.setItem(prefix + 'usedPromos', JSON.stringify(usedCodes));
             msg.innerHTML = `<span class="promo-success">+ $${reward} – ${PROMO_CODES[code].desc}!</span>`;
             play('win-sound');
             updateUI();
@@ -539,11 +566,7 @@
         money -= cost;
         unlockedColors.push(color);
         alert(`Neue Farbe freigeschaltet: ${color}`);
-        // Füge zur Farbauswahl hinzu (dynamisch)
-        const colorDiv = document.createElement('div');
-        colorDiv.onclick = () => changeColor(color);
-        colorDiv.style = `width:25px; height:25px; background:${color}; border-radius:50%; cursor:pointer;`;
-        document.querySelector('#einstellungen > div[style*="display:flex"]').appendChild(colorDiv);
+        addUnlockedColorsToUI();
         saveProgress();
         updateUI();
     }
@@ -610,8 +633,10 @@
     }
 
     function initGame() {
-        document.getElementById('player-name').innerText = document.getElementById('username').value || "User";
+        username = document.getElementById('username').value || "User";
+        document.getElementById('player-name').innerText = username;
         document.getElementById('start-overlay').classList.add('hidden');
+        loadProgress();
         updateJackpotValue();
         startJackpotTimer();
         applySoundProfile();
