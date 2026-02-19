@@ -205,15 +205,6 @@
 </head>
 
 <body>
-<div id="loginScreen">
-    <h2>Username eingeben</h2>
-    <input type="text" id="usernameInput" placeholder="Dein Name">
-    <button onclick="startGame()">Start</button>
-</div>
-
-    <div id="gameScreen" style="display:none;">
-    <!-- HIER ist dein ganzes Casino -->
-</div>
 
 <audio id="bg-music" loop></audio>
 <audio id="spin-sound"></audio>
@@ -320,8 +311,6 @@
                <button id="cheat-normal" class="cheat-btn cheat-active" onclick="setCheat('normal')">Zufall</button>
                <button id="cheat-win" class="cheat-btn" onclick="setCheat('win')">Sieg (3x)</button>
                <button id="cheat-jackpot" class="cheat-btn" onclick="setCheat('jackpot')">Jackpot (777)</button>
-               <button onclick="adminReset()">💣 GLOBAL RESET</button>
-
            </div>
        </div>
 
@@ -367,45 +356,17 @@
        </div>
    </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
 
-<script>
-  const SUPABASE_URL = "https://vprltdmlzgkvyojaxktt.supabase.co";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+<script> 
+
+const SUPABASE_URL = "https://vprltdmlzgkvyojaxktt.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwcmx0ZG1semdrdnlvamF4a3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTA4ODIsImV4cCI6MjA4NzA2Njg4Mn0.ZfVzVQyHu6gLfFHmnlV7lcDnCLShl_bWdQ1DTzxdqhM";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
-    async function adminReset() {
-    const password = prompt("Admin Passwort eingeben:");
-
-    if (password !== "NEONADMIN123") {
-        alert("Falsches Passwort!");
-        return;
-    }
-
-    await supabase
-        .from('players')
-        .delete()
-        .neq('username', '');
-
-    alert("ALLE SPIELSTÄNDE WURDEN GELÖSCHT!");
-    location.reload();
-}
-
-    async function startGame() {
-    username = document.getElementById("usernameInput").value;
-
-    if (!username) {
-        alert("Bitte Username eingeben!");
-        return;
-    }
-
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("gameScreen").style.display = "block";
-
-    await loadProgress(); // 🔥 HIER wird der Cloud Save geladen
-}
-
+    
     const SOUNDS = {
         normal: {
             bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
@@ -446,11 +407,8 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let jackpotTime = 600;
     let xp = 0;
     let maxXp = 100;
-    
 
     async function loadProgress() {
-    if (!username) return;
-
     const { data, error } = await supabase
         .from('players')
         .select('*')
@@ -470,9 +428,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
 
-async function saveProgress() {
-    if (!username) return;
-
+    async function saveProgress() {
     await supabase
         .from('players')
         .upsert({
@@ -605,22 +561,28 @@ async function saveProgress() {
     }
 
     function buyLevel() {
-    const baseCost = 10000;
-    const costIncrease = 5000;
-    const cost = baseCost + (playerLevel - 1) * costIncrease;
-
-    if (money < cost) {
-        alert(`Zu wenig Geld! Nächstes Level kostet $${cost}`);
-        return;
+        const cost = 100;
+        if (money < cost) {
+            alert("Zu wenig Geld!");
+            return;
+        }
+        money -= cost;
+        playerLevel += 1;
+        alert(`Level up! Jetzt Level ${playerLevel}. Glück erhöht!`);
+        saveProgress();
+        updateUI();
     }
 
-    money -= cost;
-    playerLevel += 1;
-    alert(`Level Up! Jetzt Level ${playerLevel}. Nächstes Level kostet $${baseCost + (playerLevel - 1) * costIncrease}`);
-    saveProgress();
-    updateUI();
-}
-
+    function buyColor(color) {
+        const cost = 50;
+        if (money < cost) {
+            alert("Zu wenig Geld!");
+            return;
+        }
+        if (unlockedColors.includes(color)) {
+            alert("Farbe bereits freigeschaltet!");
+            return;
+        }
         money -= cost;
         unlockedColors.push(color);
         alert(`Neue Farbe freigeschaltet: ${color}`);
