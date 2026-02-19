@@ -404,10 +404,11 @@
 
     function loadProgress() {
         function loadProgress() {
-    const prefix = username + '_';
+        const prefix = username + '_';
+        }
 
     const savedVersion = parseInt(localStorage.getItem(prefix + 'version')) || 0;
-    if (savedVersion !== GAME_VERSION) {
+        if (savedVersion !== GAME_VERSION) {
         localStorage.removeItem(prefix + 'money');
         localStorage.removeItem(prefix + 'level');
         localStorage.removeItem(prefix + 'xp');
@@ -416,6 +417,7 @@
         localStorage.removeItem(prefix + 'backgrounds');
         localStorage.removeItem(prefix + 'usedPromos');
         localStorage.setItem(prefix + 'version', GAME_VERSION);
+    }
     
 
         const prefix = username + '_';
