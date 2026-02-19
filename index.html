@@ -356,17 +356,8 @@
        </div>
    </div>
 </div>
-    
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-<script> 
-
-const SUPABASE_URL = "https://vprltdmlzgkvyojaxktt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwcmx0ZG1semdrdnlvamF4a3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTA4ODIsImV4cCI6MjA4NzA2Njg4Mn0.ZfVzVQyHu6gLfFHmnlV7lcDnCLShl_bWdQ1DTzxdqhM";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    
+<script>
     const SOUNDS = {
         normal: {
             bg: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
@@ -408,38 +399,27 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let xp = 0;
     let maxXp = 100;
 
-    async function loadProgress() {
-    const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .eq('username', username)
-        .single();
-
-    if (data) {
-        money = data.money;
-        playerLevel = data.level;
-        xp = data.xp;
-        maxXp = data.maxxp;
-    } else {
-        await saveProgress(); // neuer Spieler
+    function loadProgress() {
+        const prefix = username + '_';
+        money = parseInt(localStorage.getItem(prefix + 'money')) || 100;
+        playerLevel = parseInt(localStorage.getItem(prefix + 'level')) || 1;
+        xp = parseInt(localStorage.getItem(prefix + 'xp')) || 0;
+        maxXp = parseInt(localStorage.getItem(prefix + 'maxXp')) || 100;
+        unlockedColors = JSON.parse(localStorage.getItem(prefix + 'colors')) || ['#00ffff', '#ff00ff', '#33ff33', '#FFEA00'];
+        unlockedBackgrounds = JSON.parse(localStorage.getItem(prefix + 'backgrounds')) || ['#050505'];
+        addUnlockedColorsToUI();
+        updateUI();
     }
 
-    updateUI();
-}
-
-
-    async function saveProgress() {
-    await supabase
-        .from('players')
-        .upsert({
-            username: username,
-            money: money,
-            level: playerLevel,
-            xp: xp,
-            maxxp: maxXp
-        });
-}
-
+    function saveProgress() {
+        const prefix = username + '_';
+        localStorage.setItem(prefix + 'money', money);
+        localStorage.setItem(prefix + 'level', playerLevel);
+        localStorage.setItem(prefix + 'xp', xp);
+        localStorage.setItem(prefix + 'maxXp', maxXp);
+        localStorage.setItem(prefix + 'colors', JSON.stringify(unlockedColors));
+        localStorage.setItem(prefix + 'backgrounds', JSON.stringify(unlockedBackgrounds));
+    }
 
     function addUnlockedColorsToUI() {
         const container = document.querySelector('#einstellungen > div[style*="display:flex"]');
