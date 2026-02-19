@@ -827,6 +827,23 @@
         }, 10);
         setTimeout(() => xpGain.remove(), 1000);
     }
+    function buyLevel() {
+    const baseCost = 10000;
+    const costIncrease = 5000;
+    const cost = baseCost + (playerLevel - 1) * costIncrease;
+
+    if (money < cost) {
+        alert(`Zu wenig Geld! Nächstes Level kostet $${cost}`);
+        return;
+    }
+
+    money -= cost;
+    playerLevel += 1;
+    alert(`Level Up! Jetzt Level ${playerLevel}. Nächstes Level kostet $${baseCost + (playerLevel - 1) * costIncrease}`);
+    saveProgress();
+    updateUI();
+}
+
 </script>
 
 </body>
